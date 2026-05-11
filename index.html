@@ -7,544 +7,199 @@
 <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800&family=Barlow:ital,wght@0,400;0,500;0,600;1,400&display=swap" rel="stylesheet"/>
 <style>
   :root {
-    --gold: #C9A84C;
-    --gold-light: #E2C97E;
-    --gold-dim: rgba(201,168,76,0.15);
-    --bg: #0A0A0A;
-    --card: #141414;
-    --card2: #1C1C1C;
-    --white: #F2F2F2;
-    --gray: #8A8A8A;
-    --gray2: #555;
-    --border: #2A2A2A;
+    --gold: #C9A84C; --gold-light: #E2C97E; --gold-dim: rgba(201,168,76,0.12);
+    --bg: #0A0A0A; --card: #141414; --card2: #1C1C1C;
+    --white: #F2F2F2; --gray: #8A8A8A; --gray2: #444; --border: #2A2A2A;
+    --red: #E05252; --red-dim: rgba(224,82,82,0.08);
+    --yellow: #E0B84C; --yellow-dim: rgba(224,184,76,0.08);
+    --green: #4CAF7D; --green-dim: rgba(76,175,125,0.08);
   }
-
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
   html { scroll-behavior: smooth; }
+  body { background: var(--bg); color: var(--white); font-family: 'Barlow', sans-serif; min-height: 100vh; overflow-x: hidden; }
 
-  body {
-    background: var(--bg);
-    color: var(--white);
-    font-family: 'Barlow', sans-serif;
-    min-height: 100vh;
-    overflow-x: hidden;
-  }
+  .aviso-banner { background: var(--gold-dim); border-bottom: 2px solid var(--gold); padding: 14px 20px; text-align: center; }
+  .aviso-banner strong { display: block; font-family: 'Barlow Condensed', sans-serif; font-size: 14px; font-weight: 800; text-transform: uppercase; letter-spacing: 1.5px; color: var(--gold); margin-bottom: 4px; }
+  .aviso-banner p { font-size: 13px; color: var(--white); line-height: 1.55; }
+  .aviso-banner p em { color: var(--gold); font-style: normal; font-weight: 600; }
 
-  /* ── HEADER ─────────────────────────────────────── */
-  .header {
-    padding: 32px 20px 28px;
-    text-align: center;
-    border-bottom: 1px solid var(--border);
-    position: relative;
-    overflow: hidden;
-  }
-  .header::before {
-    content: '';
-    position: absolute;
-    top: -60px; left: 50%;
-    transform: translateX(-50%);
-    width: 400px; height: 200px;
-    background: radial-gradient(ellipse, rgba(201,168,76,0.12) 0%, transparent 70%);
-    pointer-events: none;
-  }
-  .header-tag {
-    font-family: 'Barlow Condensed', sans-serif;
-    font-size: 11px;
-    font-weight: 700;
-    letter-spacing: 3px;
-    color: var(--gold);
-    text-transform: uppercase;
-    margin-bottom: 10px;
-  }
-  .header h1 {
-    font-family: 'Barlow Condensed', sans-serif;
-    font-size: clamp(32px, 8vw, 52px);
-    font-weight: 800;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-    line-height: 1;
-    color: var(--white);
-    margin-bottom: 6px;
-  }
+  .header { padding: 28px 20px 22px; text-align: center; border-bottom: 1px solid var(--border); position: relative; overflow: hidden; }
+  .header::before { content: ''; position: absolute; top: -60px; left: 50%; transform: translateX(-50%); width: 400px; height: 200px; background: radial-gradient(ellipse, rgba(201,168,76,0.10) 0%, transparent 70%); pointer-events: none; }
+  .header-tag { font-family: 'Barlow Condensed', sans-serif; font-size: 10px; font-weight: 700; letter-spacing: 3px; color: var(--gold); text-transform: uppercase; margin-bottom: 8px; }
+  .header h1 { font-family: 'Barlow Condensed', sans-serif; font-size: clamp(28px, 8vw, 46px); font-weight: 800; text-transform: uppercase; letter-spacing: 1px; line-height: 1; color: var(--white); margin-bottom: 6px; }
   .header h1 span { color: var(--gold); }
-  .header-sub {
-    font-size: 13px;
-    color: var(--gray);
-    line-height: 1.6;
-    max-width: 360px;
-    margin: 10px auto 0;
-  }
+  .header-sub { font-size: 12px; color: var(--gray); line-height: 1.6; max-width: 340px; margin: 8px auto 0; }
 
-  /* ── PROGRESS BAR ───────────────────────────────── */
-  .progress-wrap {
-    position: sticky;
-    top: 0;
-    z-index: 100;
-    background: rgba(10,10,10,0.95);
-    backdrop-filter: blur(8px);
-    padding: 10px 20px;
-    border-bottom: 1px solid var(--border);
-  }
-  .progress-info {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 6px;
-  }
-  .progress-label {
-    font-family: 'Barlow Condensed', sans-serif;
-    font-size: 12px;
-    font-weight: 700;
-    letter-spacing: 2px;
-    color: var(--gray);
-    text-transform: uppercase;
-  }
-  .progress-count {
-    font-family: 'Barlow Condensed', sans-serif;
-    font-size: 15px;
-    font-weight: 700;
-    color: var(--gold);
-  }
-  .progress-bar-track {
-    height: 3px;
-    background: var(--border);
-    border-radius: 2px;
-    overflow: hidden;
-  }
-  .progress-bar-fill {
-    height: 100%;
-    background: linear-gradient(90deg, var(--gold), var(--gold-light));
-    border-radius: 2px;
-    width: 0%;
-    transition: width 0.4s ease;
-  }
+  .progress-wrap { position: sticky; top: 0; z-index: 100; background: rgba(10,10,10,0.96); backdrop-filter: blur(8px); padding: 10px 20px; border-bottom: 1px solid var(--border); }
+  .progress-info { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
+  .progress-label { font-family: 'Barlow Condensed', sans-serif; font-size: 11px; font-weight: 700; letter-spacing: 2px; color: var(--gray); text-transform: uppercase; }
+  .progress-count { font-family: 'Barlow Condensed', sans-serif; font-size: 14px; font-weight: 700; color: var(--gold); }
+  .progress-bar-track { height: 3px; background: var(--border); border-radius: 2px; overflow: hidden; }
+  .progress-bar-fill { height: 100%; background: linear-gradient(90deg, var(--gold), var(--gold-light)); border-radius: 2px; width: 0%; transition: width 0.4s ease; }
 
-  /* ── MAIN ───────────────────────────────────────── */
   .main { max-width: 600px; margin: 0 auto; padding: 0 16px 60px; }
 
-  /* ── PILAR SECTION ──────────────────────────────── */
-  .pilar {
-    margin-top: 36px;
-  }
-  .pilar-header {
-    margin-bottom: 16px;
-  }
-  .pilar-tag {
-    font-family: 'Barlow Condensed', sans-serif;
-    font-size: 10px;
-    font-weight: 700;
-    letter-spacing: 3px;
-    color: var(--gold);
-    text-transform: uppercase;
-    margin-bottom: 4px;
-  }
-  .pilar-titulo {
-    font-family: 'Barlow Condensed', sans-serif;
-    font-size: 34px;
-    font-weight: 800;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-    line-height: 1;
-    color: var(--white);
-  }
-  .pilar-titulo span {
-    color: var(--gold);
-    margin-right: 6px;
-  }
-  .pilar-desc {
-    font-size: 13px;
-    color: var(--gray);
-    line-height: 1.55;
-    margin-top: 6px;
-  }
-  .pilar-divider {
-    height: 1px;
-    background: var(--border);
-    margin: 28px 0 0;
-  }
+  .pilar { margin-top: 32px; animation: fadeUp 0.4s ease both; }
+  .pilar:nth-child(1){animation-delay:.05s} .pilar:nth-child(2){animation-delay:.10s} .pilar:nth-child(3){animation-delay:.15s} .pilar:nth-child(4){animation-delay:.20s} .pilar:nth-child(5){animation-delay:.25s}
+  .pilar-tag { font-family: 'Barlow Condensed', sans-serif; font-size: 9px; font-weight: 700; letter-spacing: 3px; color: var(--gold); text-transform: uppercase; margin-bottom: 3px; }
+  .pilar-titulo { font-family: 'Barlow Condensed', sans-serif; font-size: 28px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; line-height: 1; color: var(--white); }
+  .pilar-titulo span { color: var(--gold); margin-right: 5px; }
+  .pilar-desc { font-size: 12px; color: var(--gray); line-height: 1.55; margin-top: 5px; margin-bottom: 14px; }
+  .pilar-divider { height: 1px; background: var(--border); margin: 24px 0 0; }
 
-  /* ── CARD DE ITEM ───────────────────────────────── */
-  .item-card {
-    background: var(--card);
-    border-radius: 8px;
-    margin-bottom: 10px;
-    border-left: 3px solid var(--border);
-    transition: border-color 0.25s ease, background 0.25s ease;
-    cursor: pointer;
-    overflow: hidden;
-  }
+  .item-card { background: var(--card); border-radius: 8px; margin-bottom: 9px; border-left: 3px solid var(--border); transition: border-color .25s, background .25s; cursor: pointer; overflow: hidden; }
   .item-card:hover { background: var(--card2); }
-  .item-card.checked {
-    border-left-color: var(--gold);
-    background: var(--card2);
-  }
-
-  .item-top {
-    display: flex;
-    align-items: flex-start;
-    gap: 12px;
-    padding: 14px 16px 10px;
-  }
-
-  .checkbox {
-    width: 20px;
-    height: 20px;
-    min-width: 20px;
-    border: 1.5px solid var(--gray2);
-    border-radius: 4px;
-    margin-top: 2px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: border-color 0.2s, background 0.2s;
-    position: relative;
-  }
-  .item-card.checked .checkbox {
-    border-color: var(--gold);
-    background: var(--gold-dim);
-  }
-  .checkbox svg {
-    opacity: 0;
-    transition: opacity 0.2s;
-  }
+  .item-card.checked { border-left-color: var(--gold); background: var(--card2); }
+  .item-top { display: flex; align-items: flex-start; gap: 11px; padding: 13px 15px 9px; }
+  .checkbox { width: 19px; height: 19px; min-width: 19px; border: 1.5px solid var(--gray2); border-radius: 4px; margin-top: 2px; display: flex; align-items: center; justify-content: center; transition: border-color .2s, background .2s; }
+  .item-card.checked .checkbox { border-color: var(--gold); background: var(--gold-dim); }
+  .checkbox svg { opacity: 0; transition: opacity .2s; }
   .item-card.checked .checkbox svg { opacity: 1; }
-
   .item-texts { flex: 1; min-width: 0; }
-
-  .item-afirmacao {
-    font-family: 'Barlow', sans-serif;
-    font-weight: 600;
-    font-size: 14px;
-    line-height: 1.45;
-    color: var(--white);
-    transition: color 0.2s;
-  }
+  .item-afirmacao { font-weight: 600; font-size: 13.5px; line-height: 1.45; color: var(--white); transition: color .2s; }
   .item-card.checked .item-afirmacao { color: var(--gold-light); }
+  .item-pergunta { font-style: italic; font-size: 12px; color: var(--gold); margin-top: 4px; line-height: 1.4; }
+  .item-bottom { padding: 9px 15px 13px 45px; border-top: 1px solid var(--border); }
+  .item-contexto { font-size: 11.5px; color: var(--gray); line-height: 1.6; }
 
-  .item-pergunta {
-    font-style: italic;
-    font-size: 12.5px;
-    color: var(--gold);
-    margin-top: 5px;
-    line-height: 1.4;
-  }
+  .score-section { margin-top: 36px; padding: 22px 18px; background: var(--card); border-radius: 10px; border: 1px solid var(--border); }
+  .score-titulo { font-family: 'Barlow Condensed', sans-serif; font-size: 11px; font-weight: 700; letter-spacing: 3px; color: var(--gold); text-transform: uppercase; text-align: center; margin-bottom: 18px; }
+  .score-pilares { display: flex; flex-direction: column; gap: 9px; margin-bottom: 18px; }
+  .score-pilar { display: flex; align-items: center; gap: 10px; }
+  .score-pilar-letra { font-family: 'Barlow Condensed', sans-serif; font-size: 16px; font-weight: 800; color: var(--gold); width: 20px; text-align: center; }
+  .score-pilar-label { font-size: 11px; color: var(--gray); width: 64px; }
+  .score-pilar-bar-track { flex: 1; height: 5px; background: var(--border); border-radius: 3px; overflow: hidden; }
+  .score-pilar-bar-fill { height: 100%; background: linear-gradient(90deg, var(--gold), var(--gold-light)); border-radius: 3px; width: 0%; transition: width .5s ease; }
+  .score-pilar-num { font-family: 'Barlow Condensed', sans-serif; font-size: 13px; font-weight: 700; color: var(--white); width: 24px; text-align: right; }
+  .score-total-box { text-align: center; padding: 14px; background: var(--card2); border-radius: 8px; border: 1px solid var(--border); }
+  .score-total-num { font-family: 'Barlow Condensed', sans-serif; font-size: 42px; font-weight: 800; color: var(--gold); line-height: 1; }
+  .score-total-label { font-size: 11px; color: var(--gray); margin-top: 3px; }
 
-  .item-bottom {
-    padding: 0 16px 14px 48px;
-    border-top: 1px solid var(--border);
-    margin-top: 10px;
-    padding-top: 10px;
-  }
-  .item-contexto {
-    font-size: 12px;
-    color: var(--gray);
-    line-height: 1.6;
-  }
-
-  /* ── SCORE CARDS ────────────────────────────────── */
-  .score-section {
-    margin-top: 40px;
-    padding: 24px 20px;
-    background: var(--card);
-    border-radius: 10px;
-    border: 1px solid var(--border);
-  }
-  .score-titulo {
-    font-family: 'Barlow Condensed', sans-serif;
-    font-size: 13px;
-    font-weight: 700;
-    letter-spacing: 3px;
-    color: var(--gold);
-    text-transform: uppercase;
-    text-align: center;
-    margin-bottom: 20px;
-  }
-  .score-pilares {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-    margin-bottom: 20px;
-  }
-  .score-pilar {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-  }
-  .score-pilar-letra {
-    font-family: 'Barlow Condensed', sans-serif;
-    font-size: 18px;
-    font-weight: 800;
-    color: var(--gold);
-    width: 24px;
-    text-align: center;
-  }
-  .score-pilar-label {
-    font-size: 12px;
-    color: var(--gray);
-    width: 70px;
-  }
-  .score-pilar-bar-track {
-    flex: 1;
-    height: 6px;
-    background: var(--border);
-    border-radius: 3px;
-    overflow: hidden;
-  }
-  .score-pilar-bar-fill {
-    height: 100%;
-    background: linear-gradient(90deg, var(--gold), var(--gold-light));
-    border-radius: 3px;
-    width: 0%;
-    transition: width 0.5s ease;
-  }
-  .score-pilar-num {
-    font-family: 'Barlow Condensed', sans-serif;
-    font-size: 14px;
-    font-weight: 700;
-    color: var(--white);
-    width: 28px;
-    text-align: right;
-  }
-
-  .score-total {
-    text-align: center;
-    padding: 16px;
-    background: var(--card2);
-    border-radius: 8px;
-    border: 1px solid var(--border);
-  }
-  .score-total-num {
-    font-family: 'Barlow Condensed', sans-serif;
-    font-size: 48px;
-    font-weight: 800;
-    color: var(--gold);
-    line-height: 1;
-  }
-  .score-total-label {
-    font-size: 12px;
-    color: var(--gray);
-    margin-top: 4px;
-  }
-  .score-diagnostico {
-    font-size: 13px;
-    color: var(--white);
-    line-height: 1.6;
-    margin-top: 12px;
-    padding: 12px;
-    background: var(--gold-dim);
-    border-radius: 6px;
-    border-left: 3px solid var(--gold);
-    display: none;
-  }
-  .score-diagnostico.visible { display: block; }
-
-  /* ── FORMULÁRIO ─────────────────────────────────── */
-  .form-section {
-    margin-top: 32px;
-    padding: 24px 20px;
-    background: var(--card);
-    border-radius: 10px;
-    border: 1px solid var(--border);
-  }
-  .form-titulo {
-    font-family: 'Barlow Condensed', sans-serif;
-    font-size: 20px;
-    font-weight: 800;
-    text-transform: uppercase;
-    color: var(--white);
-    margin-bottom: 6px;
-    line-height: 1.1;
-  }
-  .form-titulo span { color: var(--gold); }
-  .form-sub {
-    font-size: 13px;
-    color: var(--gray);
-    line-height: 1.55;
-    margin-bottom: 20px;
-  }
-  .form-group {
-    margin-bottom: 14px;
-  }
-  .form-label {
-    display: block;
-    font-size: 11px;
-    font-weight: 600;
-    letter-spacing: 1.5px;
-    text-transform: uppercase;
-    color: var(--gray);
-    margin-bottom: 6px;
-  }
-  .form-input {
-    width: 100%;
-    background: var(--card2);
-    border: 1px solid var(--border);
-    border-radius: 6px;
-    padding: 12px 14px;
-    font-size: 14px;
-    font-family: 'Barlow', sans-serif;
-    color: var(--white);
-    outline: none;
-    transition: border-color 0.2s;
-  }
+  .gate-section { margin-top: 16px; padding: 22px 18px; background: var(--card2); border-radius: 10px; border: 1px solid var(--gold); display: none; }
+  .gate-section.visible { display: block; }
+  .gate-lock { text-align: center; margin-bottom: 18px; }
+  .gate-lock-icon { font-size: 26px; margin-bottom: 8px; }
+  .gate-titulo { font-family: 'Barlow Condensed', sans-serif; font-size: 20px; font-weight: 800; text-transform: uppercase; color: var(--white); line-height: 1.1; margin-bottom: 5px; }
+  .gate-titulo span { color: var(--gold); }
+  .gate-sub { font-size: 12.5px; color: var(--gray); line-height: 1.55; }
+  .form-group { margin-bottom: 12px; }
+  .form-label { display: block; font-size: 10px; font-weight: 600; letter-spacing: 1.5px; text-transform: uppercase; color: var(--gray); margin-bottom: 5px; }
+  .form-input { width: 100%; background: var(--card); border: 1px solid var(--border); border-radius: 6px; padding: 11px 13px; font-size: 14px; font-family: 'Barlow', sans-serif; color: var(--white); outline: none; transition: border-color .2s; }
   .form-input:focus { border-color: var(--gold); }
   .form-input::placeholder { color: var(--gray2); }
+  .btn-liberar { width: 100%; padding: 15px; background: var(--gold); color: #0A0A0A; border: none; border-radius: 8px; font-family: 'Barlow Condensed', sans-serif; font-size: 16px; font-weight: 800; text-transform: uppercase; letter-spacing: 2px; cursor: pointer; margin-top: 6px; transition: background .2s, transform .1s; }
+  .btn-liberar:hover { background: var(--gold-light); }
+  .btn-liberar:active { transform: scale(0.99); }
+  .btn-liberar:disabled { background: var(--gray2); cursor: not-allowed; }
 
-  .btn-enviar {
-    width: 100%;
-    padding: 16px;
-    background: var(--gold);
-    color: #0A0A0A;
-    border: none;
-    border-radius: 8px;
-    font-family: 'Barlow Condensed', sans-serif;
-    font-size: 17px;
-    font-weight: 800;
-    text-transform: uppercase;
-    letter-spacing: 2px;
-    cursor: pointer;
-    margin-top: 8px;
-    transition: background 0.2s, transform 0.1s;
-  }
-  .btn-enviar:hover { background: var(--gold-light); }
-  .btn-enviar:active { transform: scale(0.99); }
-  .btn-enviar:disabled {
-    background: var(--gray2);
-    cursor: not-allowed;
-  }
+  .diag-section { margin-top: 20px; display: none; flex-direction: column; gap: 10px; }
+  .diag-section.visible { display: flex; }
+  .diag-card { padding: 14px 16px; border-radius: 8px; border-left: 3px solid; }
+  .diag-card.vermelho { border-color: var(--red); background: var(--red-dim); }
+  .diag-card.amarelo  { border-color: var(--yellow); background: var(--yellow-dim); }
+  .diag-card.verde    { border-color: var(--green); background: var(--green-dim); }
+  .diag-card-header { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }
+  .diag-card-letra { font-family: 'Barlow Condensed', sans-serif; font-size: 20px; font-weight: 800; }
+  .diag-card.vermelho .diag-card-letra { color: var(--red); }
+  .diag-card.amarelo  .diag-card-letra { color: var(--yellow); }
+  .diag-card.verde    .diag-card-letra { color: var(--green); }
+  .diag-card-nome { font-family: 'Barlow Condensed', sans-serif; font-size: 13px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; color: var(--white); }
+  .diag-card-score { font-family: 'Barlow Condensed', sans-serif; font-size: 12px; font-weight: 700; margin-left: auto; }
+  .diag-card.vermelho .diag-card-score { color: var(--red); }
+  .diag-card.amarelo  .diag-card-score { color: var(--yellow); }
+  .diag-card.verde    .diag-card-score { color: var(--green); }
+  .diag-card-texto { font-size: 12.5px; color: var(--gray); line-height: 1.6; }
+  .diag-card-evento { font-size: 11px; color: var(--gold); margin-top: 6px; font-weight: 600; }
 
-  /* ── SUCESSO ────────────────────────────────────── */
-  .success-section {
-    display: none;
-    margin-top: 32px;
-    padding: 32px 20px;
-    background: var(--card);
-    border-radius: 10px;
-    border: 1px solid var(--gold);
-    text-align: center;
-  }
-  .success-section.visible { display: block; }
-  .success-icon {
-    font-size: 36px;
-    margin-bottom: 12px;
-  }
-  .success-titulo {
-    font-family: 'Barlow Condensed', sans-serif;
-    font-size: 24px;
-    font-weight: 800;
-    color: var(--gold);
-    text-transform: uppercase;
-    margin-bottom: 8px;
-  }
-  .success-corpo {
-    font-size: 13px;
-    color: var(--gray);
-    line-height: 1.6;
-    margin-bottom: 20px;
-  }
-  .btn-whatsapp {
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    padding: 14px 24px;
-    background: #25D366;
-    color: #fff;
-    border-radius: 8px;
-    font-family: 'Barlow Condensed', sans-serif;
-    font-size: 16px;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-    text-decoration: none;
-    transition: opacity 0.2s;
-  }
-  .btn-whatsapp:hover { opacity: 0.9; }
+  .cta-section { margin-top: 28px; padding: 26px 18px; background: var(--card); border-radius: 10px; border: 1px solid var(--border); display: none; text-align: center; }
+  .cta-section.visible { display: block; }
+  .cta-tag { font-family: 'Barlow Condensed', sans-serif; font-size: 10px; font-weight: 700; letter-spacing: 3px; color: var(--gold); text-transform: uppercase; margin-bottom: 10px; }
+  .cta-titulo { font-family: 'Barlow Condensed', sans-serif; font-size: 24px; font-weight: 800; text-transform: uppercase; color: var(--white); line-height: 1.15; margin-bottom: 10px; }
+  .cta-titulo span { color: var(--gold); }
+  .cta-corpo { font-size: 13px; color: var(--gray); line-height: 1.65; margin-bottom: 20px; text-align: left; }
+  .cta-corpo strong { color: var(--white); }
 
-  /* ── FOOTER ─────────────────────────────────────── */
-  .footer {
-    text-align: center;
-    padding: 32px 20px;
-    border-top: 1px solid var(--border);
-    margin-top: 48px;
-  }
-  .footer-brand {
-    font-family: 'Barlow Condensed', sans-serif;
-    font-size: 16px;
-    font-weight: 800;
-    letter-spacing: 2px;
-    color: var(--gold);
-    text-transform: uppercase;
-  }
-  .footer-sub {
-    font-size: 11px;
-    color: var(--gray2);
-    margin-top: 4px;
-  }
+  .evento-info { background: var(--card2); border-radius: 8px; padding: 16px; margin-bottom: 20px; text-align: left; }
+  .evento-info-titulo { font-family: 'Barlow Condensed', sans-serif; font-size: 10px; font-weight: 700; letter-spacing: 2px; color: var(--gold); text-transform: uppercase; margin-bottom: 12px; }
+  .evento-linha { display: flex; gap: 10px; align-items: flex-start; margin-bottom: 8px; font-size: 12.5px; color: var(--gray); line-height: 1.45; }
+  .evento-linha:last-child { margin-bottom: 0; }
+  .evento-linha-icon { font-size: 13px; min-width: 18px; }
+  .evento-linha strong { color: var(--white); }
+  .cronograma { margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--border); display: flex; flex-direction: column; gap: 6px; }
+  .crono-linha { display: flex; gap: 10px; align-items: flex-start; font-size: 11.5px; }
+  .crono-hora { font-family: 'Barlow Condensed', sans-serif; font-weight: 700; color: var(--gold); min-width: 38px; }
+  .crono-desc { color: var(--gray); line-height: 1.4; }
+  .crono-desc strong { color: var(--white); }
 
-  /* ── ANIMAÇÕES ──────────────────────────────────── */
-  @keyframes fadeUp {
-    from { opacity: 0; transform: translateY(16px); }
-    to   { opacity: 1; transform: translateY(0); }
-  }
-  .pilar { animation: fadeUp 0.5s ease both; }
-  .pilar:nth-child(1) { animation-delay: 0.05s; }
-  .pilar:nth-child(2) { animation-delay: 0.10s; }
-  .pilar:nth-child(3) { animation-delay: 0.15s; }
-  .pilar:nth-child(4) { animation-delay: 0.20s; }
-  .pilar:nth-child(5) { animation-delay: 0.25s; }
+  .incluso { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 22px; justify-content: center; }
+  .incluso-item { font-size: 11px; color: var(--gray); background: var(--card2); border: 1px solid var(--border); border-radius: 20px; padding: 4px 10px; }
+  .incluso-item::before { content: '✓ '; color: var(--gold); font-weight: 700; }
+
+  .cta-botoes { display: flex; flex-direction: column; gap: 10px; }
+  .btn-evento { display: flex; align-items: center; justify-content: center; gap: 8px; padding: 16px; background: var(--gold); color: #0A0A0A; border: none; border-radius: 8px; font-family: 'Barlow Condensed', sans-serif; font-size: 16px; font-weight: 800; text-transform: uppercase; letter-spacing: 1.5px; text-decoration: none; cursor: pointer; transition: background .2s, transform .1s; }
+  .btn-evento:hover { background: var(--gold-light); }
+  .btn-evento:active { transform: scale(0.99); }
+  .btn-whatsapp { display: flex; align-items: center; justify-content: center; gap: 8px; padding: 14px; background: transparent; color: var(--white); border: 1px solid var(--border); border-radius: 8px; font-family: 'Barlow Condensed', sans-serif; font-size: 15px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; text-decoration: none; transition: border-color .2s, background .2s; }
+  .btn-whatsapp:hover { border-color: #25D366; background: rgba(37,211,102,0.06); }
+  .wpp-dot { width: 8px; height: 8px; background: #25D366; border-radius: 50%; display: inline-block; }
+
+  .footer { text-align: center; padding: 28px 20px; border-top: 1px solid var(--border); margin-top: 40px; }
+  .footer-brand { font-family: 'Barlow Condensed', sans-serif; font-size: 14px; font-weight: 800; letter-spacing: 2px; color: var(--gold); text-transform: uppercase; }
+  .footer-sub { font-size: 10px; color: var(--gray2); margin-top: 3px; }
+
+  @keyframes fadeUp { from{opacity:0;transform:translateY(14px)} to{opacity:1;transform:translateY(0)} }
 </style>
 </head>
 <body>
 
-<!-- HEADER -->
+<div class="aviso-banner">
+  <strong>⚠️ Antes de começar — leia com atenção</strong>
+  <p>Marque <em>apenas o que você já faz de verdade hoje</em> no seu negócio.<br/>
+  Não o que pretende fazer. Não o que fez uma vez. <em>Só o que está aplicado agora.</em><br/>
+  O diagnóstico só funciona com honestidade.</p>
+</div>
+
 <div class="header">
   <div class="header-tag">Fé no Front · Operação Rio</div>
   <h1>Checklist do <span>Empresário</span></h1>
-  <p class="header-sub">Marque o que você já aplica. O que ficar em branco é o que está travando o seu crescimento.</p>
+  <p class="header-sub">25 pontos que separam quem trabalha muito de quem cresce com intenção. Complete e descubra onde está o seu gargalo.</p>
 </div>
 
-<!-- PROGRESS -->
 <div class="progress-wrap">
   <div class="progress-info">
-    <span class="progress-label">Seu progresso</span>
+    <span class="progress-label">Progresso</span>
     <span class="progress-count" id="progressCount">0 / 25</span>
   </div>
-  <div class="progress-bar-track">
-    <div class="progress-bar-fill" id="progressFill"></div>
-  </div>
+  <div class="progress-bar-track"><div class="progress-bar-fill" id="progressFill"></div></div>
 </div>
 
-<!-- MAIN -->
 <div class="main">
-
-  <!-- PILARES -->
   <div id="pilares-container"></div>
 
-  <!-- SCORE -->
-  <div class="score-section" id="scoreSection">
-    <div class="score-titulo">Seu Diagnóstico · Método F.R.O.N.T</div>
+  <div class="score-section">
+    <div class="score-titulo">Seu Score · Método F.R.O.N.T</div>
     <div class="score-pilares" id="scorePilares"></div>
-    <div class="score-total">
+    <div class="score-total-box">
       <div class="score-total-num" id="scoreTotalNum">0</div>
-      <div class="score-total-label">de 25 itens aplicados</div>
+      <div class="score-total-label">de 25 itens aplicados no seu negócio</div>
     </div>
-    <div class="score-diagnostico" id="scoreDiagnostico"></div>
   </div>
 
-  <!-- FORMULÁRIO -->
-  <div class="form-section" id="formSection">
-    <div class="form-titulo">Receba seu <span>resultado completo</span></div>
-    <p class="form-sub">Preencha abaixo e entraremos em contato com uma análise personalizada do seu diagnóstico.</p>
+  <div class="gate-section" id="gateSection">
+    <div class="gate-lock">
+      <div class="gate-lock-icon">🔒</div>
+      <div class="gate-titulo">Seu <span>diagnóstico completo</span> está pronto</div>
+      <p class="gate-sub" style="margin-top:6px;">Preencha abaixo para liberar a análise detalhada de cada pilar e descobrir exatamente o que está travando o seu crescimento.</p>
+    </div>
     <form id="leadForm" action="https://formspree.io/f/xgodrpnk" method="POST">
-      <!-- Campos hidden com o score -->
-      <input type="hidden" name="score_total" id="hScoreTotal"/>
-      <input type="hidden" name="score_foco" id="hScoreFoco"/>
-      <input type="hidden" name="score_rota" id="hScoreRota"/>
-      <input type="hidden" name="score_oferta" id="hScoreOferta"/>
-      <input type="hidden" name="score_negocio" id="hScoreNegocio"/>
-      <input type="hidden" name="score_tracao" id="hScoreTracao"/>
-      <input type="hidden" name="diagnostico" id="hDiagnostico"/>
-
+      <input type="hidden" name="score_total"          id="hScoreTotal"/>
+      <input type="hidden" name="score_foco"           id="hScoreFoco"/>
+      <input type="hidden" name="score_rota"           id="hScoreRota"/>
+      <input type="hidden" name="score_oferta"         id="hScoreOferta"/>
+      <input type="hidden" name="score_negocio"        id="hScoreNegocio"/>
+      <input type="hidden" name="score_tracao"         id="hScoreTracao"/>
+      <input type="hidden" name="diagnostico_resumo"   id="hResumo"/>
+      <input type="hidden" name="diagnostico_completo" id="hCompleto"/>
       <div class="form-group">
         <label class="form-label" for="nome">Nome</label>
         <input class="form-input" type="text" id="nome" name="nome" placeholder="Seu nome completo" required/>
@@ -557,28 +212,55 @@
         <label class="form-label" for="email">E-mail</label>
         <input class="form-input" type="email" id="email" name="email" placeholder="seu@email.com" required/>
       </div>
-      <button type="submit" class="btn-enviar" id="btnEnviar">Enviar meu diagnóstico</button>
+      <div class="form-group">
+        <label class="form-label" for="instagram">Instagram do negócio <span style="color:var(--gray2);font-size:9px;letter-spacing:0">(opcional)</span></label>
+        <input class="form-input" type="text" id="instagram" name="instagram" placeholder="@seuperfil"/>
+      </div>
+      <button type="submit" class="btn-liberar" id="btnLiberar">🔓 Liberar meu diagnóstico</button>
     </form>
   </div>
 
-  <!-- SUCESSO -->
-  <div class="success-section" id="successSection">
-    <div class="success-icon">✅</div>
-    <div class="success-titulo">Diagnóstico enviado!</div>
-    <p class="success-corpo">
-      Recebemos seu checklist. Em breve entraremos em contato com uma análise personalizada.<br/><br/>
-      Enquanto isso, se quiser conversar agora sobre o que você identificou:
-    </p>
-    <a class="btn-whatsapp"
-       href="https://wa.me/5521966559243?text=Ol%C3%A1%2C%20acabei%20de%20preencher%20o%20checklist%20do%20m%C3%A9todo%20F.R.O.N.T%20e%20quero%20saber%20mais%20sobre%20a%20Opera%C3%A7%C3%A3o%20Rio!"
-       target="_blank">
-      💬 Falar no WhatsApp
-    </a>
-  </div>
+  <div class="diag-section" id="diagSection"></div>
 
+  <div class="cta-section" id="ctaSection">
+    <div class="cta-tag">Operação Rio · 15 de Maio de 2026</div>
+    <div class="cta-titulo" id="ctaTitulo"></div>
+    <div class="cta-corpo" id="ctaCorpo"></div>
+
+    <div class="evento-info">
+      <div class="evento-info-titulo">Detalhes do Evento</div>
+      <div class="evento-linha"><span class="evento-linha-icon">📅</span><span><strong>15 de maio de 2026</strong> · Sexta-feira</span></div>
+      <div class="evento-linha"><span class="evento-linha-icon">📍</span><span><strong>Av. Embaixador Abelardo Bueno, 1</strong> · Sala de Treinamentos · Barra da Tijuca · Rio de Janeiro, RJ</span></div>
+      <div class="evento-linha"><span class="evento-linha-icon">🕐</span><span>Credenciamento a partir das <strong>13h30</strong> · Encerramento às <strong>18h30</strong></span></div>
+      <div class="evento-linha"><span class="evento-linha-icon">🎯</span><span>Formato: <strong>Imersão presencial</strong> · objetivo e sem enrolação</span></div>
+      <div class="cronograma">
+        <div class="crono-linha"><div class="crono-hora">13h30</div><div class="crono-desc">Credenciamento e abertura</div></div>
+        <div class="crono-linha"><div class="crono-hora">14h00</div><div class="crono-desc"><strong>Braian Corrêa</strong> · Produto, Oferta e Modelo de Negócio</div></div>
+        <div class="crono-linha"><div class="crono-hora">15h30</div><div class="crono-desc">☕ Coffee Break</div></div>
+        <div class="crono-linha"><div class="crono-hora">16h00</div><div class="crono-desc"><strong>Nando Borba</strong> · Marketing, Vendas e IA — Estratégias para seu negócio vender mais</div></div>
+        <div class="crono-linha"><div class="crono-hora">17h30</div><div class="crono-desc">Painel: Dúvidas e Análise de Negócios</div></div>
+        <div class="crono-linha"><div class="crono-hora">18h30</div><div class="crono-desc">Encerramento</div></div>
+      </div>
+    </div>
+
+    <div class="incluso">
+      <span class="incluso-item">Acesso completo à Operação Rio</span>
+      <span class="incluso-item">Material de apoio estratégico (digital)</span>
+      <span class="incluso-item">Grupo exclusivo pós-evento</span>
+      <span class="incluso-item">Coffee break</span>
+    </div>
+
+    <div class="cta-botoes">
+      <a class="btn-evento" href="https://operacaorio.fenofront.com.br/index-b.html" target="_blank">
+        🎯 Garantir minha vaga na Operação Rio
+      </a>
+      <a class="btn-whatsapp" href="https://wa.me/5521966559243?text=Ol%C3%A1%2C%20fiz%20o%20checklist%20do%20m%C3%A9todo%20F.R.O.N.T%20e%20quero%20saber%20mais%20sobre%20a%20Opera%C3%A7%C3%A3o%20Rio!" target="_blank">
+        <span class="wpp-dot"></span> Falar com a equipe no WhatsApp
+      </a>
+    </div>
+  </div>
 </div>
 
-<!-- FOOTER -->
 <div class="footer">
   <div class="footer-brand">Fé no Front</div>
   <div class="footer-sub">Estratégia. Estrutura. Propósito.</div>
@@ -586,264 +268,186 @@
 
 <script>
 const PILARES = [
-  {
-    letra: "F", nome: "FOCO",
-    desc: "Clareza de propósito antes de qualquer movimento. Em números, prazos e estrutura — não em sonhos.",
-    itens: [
-      ["Sei exatamente onde meu negócio está hoje — em números reais, não em percepção.",
-       "Você consegue descrever a situação atual da sua empresa com dados concretos?",
-       "A maioria dos empresários opera por sensação. Sem um diagnóstico claro do ponto A, qualquer estratégia vira chute. Foco começa com honestidade sobre a realidade atual."],
-      ["Tenho um destino definido: onde quero estar em 12 meses, com metas claras e mensuráveis.",
-       "Seu objetivo para o próximo ano cabe em um número e uma data?",
-       "Sonho sem prazo é só desejo. O empresário que cresce com intenção sabe exatamente o que quer alcançar e em quanto tempo. Isso muda as decisões do dia a dia."],
-      ["Minhas prioridades semanais estão alinhadas com o objetivo maior do negócio.",
-       "O que você fez essa semana realmente te aproximou do seu maior objetivo?",
-       "É comum o empresário trabalhar muito e avançar pouco. Quando as prioridades não têm conexão com a meta principal, a energia se dispersa e o negócio patina."],
-      ["Sei qual é o meu papel no negócio hoje e onde preciso parar de atuar para crescer.",
-       "Você ainda é o gargalo principal da sua empresa?",
-       "Muitos empresários são o maior obstáculo do próprio crescimento. Reconhecer onde você precisa sair é um ato de liderança, não de fraqueza."],
-      ["Tenho clareza sobre o propósito do negócio — e isso orienta minhas decisões difíceis.",
-       "Quando surge uma decisão difícil, você tem um norte claro para se guiar?",
-       "Propósito não é frase de parede. É o critério que define o que você aceita e o que recusa. Empresas sem propósito claro tomam decisões inconsistentes e perdem identidade."],
-    ]
-  },
-  {
-    letra: "R", nome: "ROTA",
-    desc: "O mapa financeiro e operacional do crescimento. A conta, não o chute. Decisão com critério.",
-    itens: [
-      ["Conheço minha margem líquida real — não o faturamento, mas o que sobra de verdade.",
-       "Se alguém te perguntar sua margem líquida agora, você responde com segurança?",
-       "Faturamento é vaidade. Lucro é sanidade. Empresários que não conhecem sua margem real tomam decisões de preço, investimento e expansão no escuro."],
-      ["Sei quanto custa adquirir um cliente novo e quanto ele vale ao longo do tempo.",
-       "Você sabe se está investindo mais para adquirir um cliente do que ele te devolve?",
-       "CAC e LTV são os dois números que definem se um negócio é saudável ou uma máquina de queimar dinheiro. Sem eles, crescer pode significar piorar."],
-      ["Tenho um plano de alocação de recursos claro: onde invisto, onde corto, onde escalo.",
-       "Suas decisões de investimento seguem um critério ou a urgência do momento?",
-       "A maioria dos empresários investe por impulso ou pressão. Uma rota de crescimento exige saber com antecedência onde o dinheiro vai trabalhar e por quê."],
-      ["Conheço meu ponto de equilíbrio e sei o quanto preciso vender para sustentá-lo.",
-       "Você sabe quantas vendas precisa fazer só para pagar as contas do mês?",
-       "O ponto de equilíbrio é o piso do negócio. Quem não sabe onde ele está opera sem chão — qualquer mês ruim vira crise porque não existia previsão real."],
-      ["Tenho previsibilidade de caixa para os próximos 60 a 90 dias.",
-       "Você sabe o que entra e o que sai do seu caixa nos próximos 3 meses?",
-       "Negócios que não planejam o caixa vivem em modo apagar incêndio. Previsibilidade não é luxo — é a diferença entre tomar decisões ou ser tomado por elas."],
-    ]
-  },
-  {
-    letra: "O", nome: "OFERTA",
-    desc: "O que você vende de verdade e como o mercado te enxerga. A distância entre esses dois pontos é onde você perde dinheiro.",
-    itens: [
-      ["Sei exatamente qual produto ou serviço gera mais lucro — não só mais faturamento.",
-       "Você já calculou qual oferta realmente vale a pena manter no seu portfólio?",
-       "Vender muito do produto errado é pior do que vender pouco do certo. Empresários que não sabem qual oferta é mais lucrativa trabalham mais para ganhar menos."],
-      ["Minha oferta tem um diferencial claro que o cliente percebe sem eu precisar explicar.",
-       "Se você não estivesse na sala, seu cliente conseguiria explicar por que você é diferente?",
-       "Diferencial que precisa de explicação não é diferencial — é argumento de vendedor. A oferta poderosa comunica valor antes mesmo da conversa começar."],
-      ["Meu preço reflete o valor que entrego — e não foi definido olhando para o concorrente.",
-       "Sua precificação tem critério ou você copia o mercado com um pequeno ajuste?",
-       "Preço copiado do concorrente ignora sua estrutura de custo, sua margem e o valor real que você entrega. E te prende numa corrida que você não vai ganhar."],
-      ["Tenho clareza sobre quem é meu cliente ideal e consigo recusar quem não se encaixa.",
-       "Você consegue dizer não para um cliente que não é o seu cliente?",
-       "Tentar vender para todo mundo é a forma mais rápida de diluir valor e esgotar o time. A oferta certa para o cliente certo gera resultado — e menos retrabalho."],
-      ["Minha oferta resolve um problema real e urgente — e o cliente sente isso antes de comprar.",
-       "Seu cliente compra porque quer ou porque sente que precisa?",
-       "Oferta que não resolve dor urgente depende de convencimento. Oferta que resolve dor real vende por identificação. A diferença está em quanto esforço você gasta para fechar cada venda."],
-    ]
-  },
-  {
-    letra: "N", nome: "NEGÓCIO",
-    desc: "Estrutura e processos que sustentam o crescimento sem você. Nenhum negócio escala quando você é o motor, o combustível e o mecânico.",
-    itens: [
-      ["Meu negócio funciona bem mesmo quando estou ausente por alguns dias.",
-       "O que acontece na sua empresa quando você tira uma semana de folga?",
-       "Se a resposta for caos, você não tem um negócio — tem um emprego disfarçado. Escalabilidade começa quando a operação não depende da presença física do dono."],
-      ["Tenho processos documentados para as principais atividades da empresa.",
-       "Se um colaborador-chave saísse hoje, você conseguiria substituí-lo sem perder qualidade?",
-       "Processo documentado não é burocracia. É o que transforma o conhecimento do dono em patrimônio da empresa. Sem isso, cada saída de colaborador é uma crise."],
-      ["Meu time sabe o que é esperado — com metas claras e responsabilidades bem definidas.",
-       "Sua equipe sabe exatamente o que significa ter um bom desempenho na função dela?",
-       "Time sem clareza de expectativa trabalha no piloto automático. Metas vagas geram conflitos e desmotivação. Clareza é a base da liderança."],
-      ["Tenho indicadores que me dizem semanalmente se o negócio está saudável ou em risco.",
-       "Você descobre que algo está errado antes que vire um problema grave?",
-       "Empresário que só descobre o problema quando já é crise não tem gestão — tem sorte. Indicadores simples e bem escolhidos são o sistema de alerta do negócio."],
-      ["Minha estrutura de custos está dimensionada para o momento atual do negócio.",
-       "Você cresceu a estrutura junto com o faturamento sem revisar se isso faz sentido?",
-       "Muitas empresas crescem o faturamento e encolhem o lucro porque a estrutura inflou junto. Revisar o dimensionamento é uma das decisões mais impactantes que um empresário pode tomar."],
-    ]
-  },
-  {
-    letra: "T", nome: "TRAÇÃO",
-    desc: "Canais, investimento e aquisição de cliente com critério. Misturar canal é gastar dinheiro para gerar curtida, não venda.",
-    itens: [
-      ["Sei qual canal de aquisição gera os melhores clientes — e concentro esforço nele.",
-       "Você sabe de onde vêm seus melhores clientes ou apenas os mais recentes?",
-       "Estar em todos os canais sem estratégia é dispersão. O empresário que cresce com consistência escolhe dois ou três canais e vai fundo neles antes de expandir."],
-      ["Tenho uma presença digital que gera autoridade e não apenas seguidores.",
-       "Quando seu cliente ideal pesquisa sobre o que você faz, você aparece com credibilidade?",
-       "Presença digital sem estratégia é ruído. Mas ausência total é invisibilidade. Em mercados disputados, autoridade digital se tornou um ativo de vendas — não uma opção."],
-      ["Invisto em tráfego pago com objetivo claro e sei calcular o retorno desse investimento.",
-       "Você sabe exatamente quanto retorna para o seu negócio cada real investido em anúncio?",
-       "Anúncio sem medição é custo. Com medição, é investimento. A diferença entre empresas que escalam e as que desperdiçam está na capacidade de ler os números da mídia paga."],
-      ["Meu processo de vendas é estruturado — não depende de improviso ou carisma do vendedor.",
-       "Se você colocar uma pessoa nova para vender, ela consegue seguir um processo e ter resultado?",
-       "Vendas que dependem do talento de uma pessoa não escalam. Processo de vendas transforma conversas em previsibilidade — e previsibilidade em crescimento."],
-      ["Tenho uma estratégia de retenção — sei o que faço para o cliente comprar de novo.",
-       "Qual é o seu plano para que o cliente que comprou hoje volte no próximo mês?",
-       "Adquirir cliente novo custa em média 5 vezes mais do que reter um. Empresas sem estratégia de retenção vivem numa corrida onde precisam correr mais rápido só para ficarem no lugar."],
-    ]
-  },
+  { letra:"F", nome:"FOCO", desc:"Clareza de propósito antes de qualquer movimento. Em números, prazos e estrutura — não em sonhos.", itens:[
+    ["Sei exatamente onde meu negócio está hoje — faturamento, margem, custos e posição de mercado.","Você consegue descrever sua empresa com dados concretos agora?","A maioria dos empresários opera por sensação. Sem diagnóstico claro do ponto A, qualquer estratégia vira chute. Foco começa com honestidade sobre a realidade atual."],
+    ["Tenho metas definidas para os próximos 12 meses — com números e prazos, não intenções.","Seu objetivo para o próximo ano cabe em um número e uma data?","Sonho sem prazo é desejo. O empresário que cresce com intenção sabe exatamente o que quer alcançar e em quanto tempo — e toma decisões diárias alinhadas a isso."],
+    ["Minhas prioridades semanais estão conectadas ao objetivo maior do negócio.","O que você fez essa semana realmente te aproximou da sua meta anual?","É comum trabalhar muito e avançar pouco. Quando as prioridades não têm conexão com a meta principal, a energia se dispersa e o negócio patina no lugar."],
+    ["Sei qual é o meu papel no negócio hoje — e onde preciso parar de atuar para crescer.","Você ainda é o gargalo principal da sua empresa?","Muitos empresários são o maior obstáculo do próprio crescimento. Reconhecer onde você precisa sair do operacional é um ato de liderança, não de fraqueza."],
+    ["Tenho um planejamento formal — revisado e ajustado pelo menos uma vez por trimestre.","Você tem um plano de negócio escrito que guia suas decisões hoje?","Sem planejamento formal, o empresário reage ao mercado em vez de antecipá-lo. Planejar não é burocracia — é o que separa quem escala de quem sobrevive."],
+  ]},
+  { letra:"R", nome:"ROTA", desc:"O mapa financeiro e operacional do crescimento. A conta, não o chute. Decisão com critério.", itens:[
+    ["Conheço minha margem líquida real — não o faturamento, mas o que sobra de verdade.","Se alguém te perguntar sua margem líquida agora, você responde com segurança?","Faturamento é vaidade. Lucro é sanidade. Quem não conhece sua margem real toma decisões de preço, investimento e expansão completamente no escuro."],
+    ["Sei quanto custa adquirir um cliente novo (CAC) e quanto ele vale ao longo do tempo (LTV).","Você sabe se está investindo mais para adquirir um cliente do que ele te devolve?","CAC e LTV são os dois números que definem se um negócio é saudável ou uma máquina de queimar dinheiro. Sem eles, crescer pode significar piorar."],
+    ["Tenho previsibilidade de caixa para os próximos 60 a 90 dias.","Você sabe o que entra e o que sai do seu caixa nos próximos 3 meses?","Negócios sem planejamento de caixa vivem em modo apagar incêndio. Previsibilidade não é luxo — é a diferença entre tomar decisões ou ser tomado por elas."],
+    ["Conheço meu ponto de equilíbrio e sei quantas vendas preciso fazer para cobri-lo.","Você sabe quantas vendas precisa fechar só para pagar as contas do mês?","O ponto de equilíbrio é o piso do negócio. Quem não sabe onde ele está opera sem chão — qualquer mês fraco vira crise porque nunca houve previsão real."],
+    ["Tenho um modelo claro de arquitetura de receita: produtos, recorrência, upsell e margens por linha.","Você sabe de onde vem cada real do seu faturamento e qual linha é mais rentável?","Empresas que crescem de forma saudável não dependem de uma única fonte de receita. Arquitetura de receita é o que garante previsibilidade e resiliência financeira."],
+  ]},
+  { letra:"O", nome:"OFERTA", desc:"O que você vende de verdade e como o mercado te enxerga. A distância entre esses dois pontos é onde você perde dinheiro.", itens:[
+    ["Sei exatamente qual produto ou serviço gera mais lucro — não só mais faturamento.","Você já calculou qual oferta realmente vale a pena manter no portfólio?","Vender muito do produto errado é pior do que vender pouco do certo. Empresários que não sabem qual oferta é mais lucrativa trabalham mais para ganhar menos."],
+    ["Minha oferta tem um diferencial claro que o cliente percebe sem eu precisar explicar.","Se você não estivesse na sala, seu cliente conseguiria explicar por que você é diferente?","Diferencial que precisa de explicação não é diferencial — é argumento de vendedor. A oferta poderosa comunica valor antes mesmo da conversa começar."],
+    ["Meu preço reflete o valor que entrego — e não foi definido olhando para o concorrente.","Sua precificação tem critério ou você copia o mercado com um pequeno ajuste?","Preço copiado do concorrente ignora sua estrutura de custo, sua margem e o valor real que você entrega. E te prende numa corrida de preço que você não vai ganhar."],
+    ["Tenho clareza sobre quem é meu cliente ideal — e consigo recusar quem não se encaixa.","Você consegue dizer não para um cliente que não é o seu cliente?","Tentar servir todo mundo é a forma mais rápida de diluir valor e esgotar o time. A oferta certa para o cliente certo gera resultado real — e muito menos retrabalho."],
+    ["Minha oferta resolve uma dor real e urgente — e o cliente sente isso antes de comprar.","Seu cliente compra porque quer ou porque sente que precisa?","Oferta que não resolve dor urgente depende de convencimento. Oferta que resolve dor real vende por identificação. A diferença está em quanto esforço você gasta para fechar cada venda."],
+  ]},
+  { letra:"N", nome:"NEGÓCIO", desc:"Estrutura e processos que sustentam o crescimento sem você. Nenhum negócio escala quando você é o motor, o combustível e o mecânico.", itens:[
+    ["Meu negócio opera bem mesmo quando estou ausente por alguns dias.","O que acontece na sua empresa quando você tira uma semana de folga?","Se a resposta for caos, você não tem um negócio — tem um emprego disfarçado. Escalabilidade começa quando a operação não depende da presença física do dono."],
+    ["Tenho processos documentados para as principais atividades da empresa.","Se um colaborador-chave saísse hoje, você conseguiria substituí-lo sem perder qualidade?","Processo documentado transforma o conhecimento do dono em patrimônio da empresa. Sem isso, cada saída de colaborador é uma crise — e cada novo contratado começa do zero."],
+    ["Meu time tem metas claras e indicadores que medem o desempenho de cada função.","Sua equipe sabe exatamente o que significa ter um bom desempenho na função dela?","Time sem clareza de expectativa trabalha no piloto automático. Metas vagas geram conflitos, desmotivação e resultados inconsistentes. Clareza é a base da liderança."],
+    ["Acompanho os KPIs do negócio semanalmente e sei identificar problemas antes que virem crises.","Você descobre que algo está errado antes que vire um problema grave?","Empresário que só descobre o problema quando já é crise não tem gestão — tem sorte. Indicadores simples e bem escolhidos são o sistema de alerta precoce do negócio."],
+    ["Tenho um processo de vendas estruturado — com etapas definidas, CRM e acompanhamento de pipeline.","Seu processo de vendas existe no papel ou só na cabeça do vendedor?","Vendas que dependem do talento ou memória de uma pessoa não escalam. CRM e processo estruturado transformam conversas em previsibilidade — e previsibilidade em crescimento."],
+  ]},
+  { letra:"T", nome:"TRAÇÃO", desc:"Canais, investimento e aquisição de cliente com critério. Misturar canal é gastar dinheiro para gerar curtida, não venda.", itens:[
+    ["Sei qual canal de aquisição gera os melhores clientes — e concentro esforço nele.","Você sabe de onde vêm seus melhores clientes ou apenas os mais recentes?","Estar em todos os canais sem estratégia é dispersão. O empresário que cresce com consistência escolhe dois ou três canais, vai fundo neles e só expande depois de dominar."],
+    ["Tenho uma estratégia de conteúdo que gera autoridade e posicionamento no meu mercado.","Quando seu cliente ideal pesquisa sobre o que você faz, você aparece com credibilidade?","Presença digital sem estratégia é ruído. Ausência total é invisibilidade. Em mercados disputados, autoridade digital se tornou um ativo de vendas — não uma opção de marketing."],
+    ["Invisto em tráfego pago com objetivo claro e meço o retorno de cada real investido.","Você sabe exatamente quanto retorna para o seu negócio cada real investido em anúncio?","Anúncio sem medição é custo. Com medição e estratégia, é investimento. A diferença entre empresas que escalam e as que desperdiçam está em saber ler os números da mídia paga."],
+    ["Tenho uma estratégia ativa de retenção — sei o que faço para o cliente comprar de novo.","Qual é o seu plano concreto para que o cliente que comprou hoje volte no próximo mês?","Adquirir cliente novo custa em média 5 vezes mais do que reter um. Empresas sem estratégia de retenção vivem numa corrida onde precisam correr mais rápido só para ficarem no lugar."],
+    ["Minha presença nas redes sociais tem consistência, linha editorial e objetivo claro de negócio.","Suas redes sociais geram oportunidades reais de venda ou apenas engajamento sem retorno?","Redes sociais sem planejamento editorial e objetivo de negócio são hobby, não estratégia. Conteúdo sem alinhamento de oferta e posicionamento não converte — só consome tempo."],
+  ]},
 ];
 
-// Estado
-const checked = {};
-PILARES.forEach((p, pi) => p.itens.forEach((_, ii) => checked[`${pi}-${ii}`] = false));
+function getDiag(letra, score) {
+  const nivel = score <= 1 ? 'vermelho' : score <= 3 ? 'amarelo' : 'verde';
+  const d = {
+    F:{ vermelho:{texto:"Seu negócio opera sem direção clara. Sem saber onde está e para onde vai, cada decisão é um chute. O risco de trabalhar muito e crescer pouco é alto.",evento:"Na Operação Rio vamos trabalhar planejamento estratégico e como construir um norte claro — com metas reais e prioridades que geram resultado."},
+        amarelo:{texto:"Você tem alguma clareza de direção, mas ainda existem lacunas. Decisões relevantes ainda são tomadas por intuição em vez de critério.",evento:"Na Operação Rio vamos aprofundar planejamento, priorização e como transformar intenção em execução consistente."},
+        verde:  {texto:"Você tem foco e direção. O desafio agora é manter a consistência e garantir que o time esteja alinhado ao mesmo norte.",evento:"Na Operação Rio vamos trabalhar como escalar sem perder foco estratégico e como engajar o time no planejamento."} },
+    R:{ vermelho:{texto:"Seu negócio não tem um mapa financeiro claro. Sem margem, CAC, LTV e ponto de equilíbrio definidos, você pode estar crescendo no prejuízo sem saber.",evento:"Na Operação Rio vamos trabalhar arquitetura de receita, métricas financeiras essenciais e como construir previsibilidade de caixa."},
+        amarelo:{texto:"Você entende alguns números, mas ainda faltam indicadores críticos. Isso cria vulnerabilidade nos meses mais difíceis.",evento:"Na Operação Rio vamos fechar as lacunas financeiras — especialmente arquitetura de receita, KPIs de caixa e rota de crescimento sustentável."},
+        verde:  {texto:"Você tem boa visibilidade financeira. O foco agora é otimizar a arquitetura de receita e criar fontes mais previsíveis e recorrentes.",evento:"Na Operação Rio vamos trabalhar como diversificar receita, aumentar LTV e construir um modelo financeiro que suporte escalada."} },
+    O:{ vermelho:{texto:"Sua oferta precisa de atenção urgente. Sem clareza sobre o que vende, para quem e a que preço, você compete por custo — e essa guerra esgota.",evento:"Na Operação Rio vamos trabalhar oferta, posicionamento e precificação baseada em valor. É um dos temas centrais do evento."},
+        amarelo:{texto:"Você tem uma oferta funcionando, mas sem o diferencial claro que permite cobrar mais e atrair o cliente certo com menos esforço.",evento:"Na Operação Rio vamos aprofundar posicionamento de oferta, diferenciação e como comunicar valor antes da conversa de venda começar."},
+        verde:  {texto:"Sua oferta está bem estruturada. O próximo passo é refinar o posicionamento e ampliar o alcance sem perder a clareza do diferencial.",evento:"Na Operação Rio vamos trabalhar como escalar uma oferta forte com tráfego e conteúdo estratégico sem diluir o posicionamento."} },
+    N:{ vermelho:{texto:"Seu negócio depende demais de você. Sem processos, indicadores e time estruturado, o crescimento tem teto — e esse teto é você mesmo.",evento:"Na Operação Rio vamos trabalhar estrutura operacional, CRM, gestão de vendas e como construir um negócio que funciona sem depender só do dono."},
+        amarelo:{texto:"Você tem alguma estrutura, mas pontos críticos ainda dependem exclusivamente de você. Isso limita a escalada e aumenta o risco operacional.",evento:"Na Operação Rio vamos trabalhar processos, KPIs de desempenho e como construir um time com metas claras e autonomia real."},
+        verde:  {texto:"Seu negócio tem boa estrutura. O desafio agora é escalar sem perder qualidade e construir liderança que sustente o crescimento.",evento:"Na Operação Rio vamos trabalhar como evoluir a gestão, usar CRM de forma estratégica e construir uma cultura de performance."} },
+    T:{ vermelho:{texto:"Seu negócio não tem estratégia clara de aquisição. Sem canais definidos e investimento medido, o crescimento depende de indicação e sorte.",evento:"Na Operação Rio vamos trabalhar tráfego pago, posicionamento nas redes, produção de conteúdo e como construir uma máquina de aquisição previsível."},
+        amarelo:{texto:"Você tem alguma presença e atração de clientes, mas sem estratégia clara de canais e métricas de retorno. Isso gera desperdício e resultados inconsistentes.",evento:"Na Operação Rio vamos estruturar sua estratégia de tráfego, conteúdo e retenção — com foco em resultado mensurável, não em engajamento vazio."},
+        verde:  {texto:"Você já tem tração. O próximo passo é escalar os canais que funcionam, otimizar o CAC e construir retenção que multiplique o LTV.",evento:"Na Operação Rio vamos trabalhar como escalar canais com eficiência, automatizar retenção e usar conteúdo para aumentar autoridade e conversão."} },
+  };
+  return { nivel, ...d[letra][nivel] };
+}
 
-// Render
+function getCTA(total) {
+  if(total <= 8) return {
+    titulo:"Você identificou lacunas <span>críticas</span> no seu negócio.",
+    corpo:`Seu score de <strong>${total}/25</strong> mostra que o negócio funciona mais por esforço do que por estrutura. Isso cansa — e tem limite.<br/><br/>A <strong>Operação Rio</strong> foi feita exatamente para quem está nesse momento: empresários que trabalham muito, sentem que poderiam crescer mais, mas ainda não têm a estrutura que transforma esforço em resultado previsível.<br/><br/>Em um dia, você vai sair com clareza, ferramentas e um plano real para cada lacuna que identificou aqui.`
+  };
+  if(total <= 16) return {
+    titulo:"Você tem base — mas existem <span>pontos custando crescimento.</span>",
+    corpo:`Seu score de <strong>${total}/25</strong> mostra que você já construiu algo sólido, mas existem lacunas específicas limitando o próximo nível.<br/><br/>Na <strong>Operação Rio</strong> vamos trabalhar exatamente os pilares onde você ainda tem pontos em aberto — com profundidade, aplicação prática e sem enrolação.<br/><br/>Esse é o evento para quem já começou a construir e quer parar de deixar dinheiro e crescimento na mesa.`
+  };
+  return {
+    titulo:"Você tem estrutura. <span>Hora de escalar.</span>",
+    corpo:`Seu score de <strong>${total}/25</strong> coloca você à frente da maioria dos empresários. Você tem base — o que falta agora é otimizar, escalar e garantir que o que funciona hoje continue funcionando enquanto o negócio cresce.<br/><br/>A <strong>Operação Rio</strong> é onde você vai afinar cada pilar, conectar estratégia com execução e sair com um plano claro de escalada.<br/><br/>Empresários com sua base saem do evento com decisões que mudam o próximo trimestre.`
+  };
+}
+
+const checked = {};
+PILARES.forEach((p,pi) => p.itens.forEach((_,ii) => checked[`${pi}-${ii}`] = false));
+let formSubmitted = false;
+
+// Render pilares
 const container = document.getElementById('pilares-container');
-PILARES.forEach((p, pi) => {
+PILARES.forEach((p,pi) => {
   const sec = document.createElement('div');
   sec.className = 'pilar';
-  sec.innerHTML = `
-    <div class="pilar-header">
-      <div class="pilar-tag">Pilar ${p.letra} · Método F.R.O.N.T</div>
-      <div class="pilar-titulo"><span>${p.letra}</span>${p.nome}</div>
-      <div class="pilar-desc">${p.desc}</div>
-    </div>
-  `;
-  p.itens.forEach(([af, pq, ctx], ii) => {
+  sec.innerHTML = `<div class="pilar-tag">Pilar ${p.letra} · Método F.R.O.N.T</div><div class="pilar-titulo"><span>${p.letra}</span>${p.nome}</div><div class="pilar-desc">${p.desc}</div>`;
+  p.itens.forEach(([af,pq,ctx],ii) => {
     const card = document.createElement('div');
     card.className = 'item-card';
     card.id = `card-${pi}-${ii}`;
-    card.innerHTML = `
-      <div class="item-top">
-        <div class="checkbox">
-          <svg width="12" height="10" viewBox="0 0 12 10" fill="none">
-            <path d="M1 5L4.5 8.5L11 1" stroke="#C9A84C" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-          </svg>
-        </div>
-        <div class="item-texts">
-          <div class="item-afirmacao">${af}</div>
-          <div class="item-pergunta">${pq}</div>
-        </div>
-      </div>
-      <div class="item-bottom">
-        <div class="item-contexto">${ctx}</div>
-      </div>
-    `;
-    card.addEventListener('click', () => toggle(pi, ii));
+    card.innerHTML = `<div class="item-top"><div class="checkbox"><svg width="11" height="9" viewBox="0 0 11 9" fill="none"><path d="M1 4.5L4 7.5L10 1" stroke="#C9A84C" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div><div class="item-texts"><div class="item-afirmacao">${af}</div><div class="item-pergunta">${pq}</div></div></div><div class="item-bottom"><div class="item-contexto">${ctx}</div></div>`;
+    card.addEventListener('click', () => { if(!formSubmitted){ checked[`${pi}-${ii}`]=!checked[`${pi}-${ii}`]; card.classList.toggle('checked',checked[`${pi}-${ii}`]); updateScore(); }});
     sec.appendChild(card);
   });
-  const div = document.createElement('div');
-  div.className = 'pilar-divider';
-  sec.appendChild(div);
+  sec.appendChild(Object.assign(document.createElement('div'),{className:'pilar-divider'}));
   container.appendChild(sec);
 });
 
 // Render score bars
 const scorePilaresEl = document.getElementById('scorePilares');
-PILARES.forEach((p, pi) => {
+PILARES.forEach((p,pi) => {
   const row = document.createElement('div');
   row.className = 'score-pilar';
-  row.innerHTML = `
-    <div class="score-pilar-letra">${p.letra}</div>
-    <div class="score-pilar-label">${p.nome}</div>
-    <div class="score-pilar-bar-track">
-      <div class="score-pilar-bar-fill" id="bar-${pi}"></div>
-    </div>
-    <div class="score-pilar-num" id="num-${pi}">0/5</div>
-  `;
+  row.innerHTML = `<div class="score-pilar-letra">${p.letra}</div><div class="score-pilar-label">${p.nome}</div><div class="score-pilar-bar-track"><div class="score-pilar-bar-fill" id="bar-${pi}"></div></div><div class="score-pilar-num" id="num-${pi}">0/5</div>`;
   scorePilaresEl.appendChild(row);
 });
 
-function toggle(pi, ii) {
-  const key = `${pi}-${ii}`;
-  checked[key] = !checked[key];
-  const card = document.getElementById(`card-${pi}-${ii}`);
-  card.classList.toggle('checked', checked[key]);
-  updateScore();
+function getScores() {
+  return PILARES.map((p,pi) => { let s=0; p.itens.forEach((_,ii)=>{ if(checked[`${pi}-${ii}`]) s++; }); return s; });
 }
 
 function updateScore() {
-  let total = 0;
-  const pilarScores = PILARES.map((p, pi) => {
-    let s = 0;
-    p.itens.forEach((_, ii) => { if (checked[`${pi}-${ii}`]) s++; });
-    return s;
-  });
-  total = pilarScores.reduce((a, b) => a + b, 0);
-
-  // Progress bar
+  const ps = getScores();
+  const total = ps.reduce((a,b)=>a+b,0);
   document.getElementById('progressCount').textContent = `${total} / 25`;
-  document.getElementById('progressFill').style.width = `${(total/25)*100}%`;
+  document.getElementById('progressFill').style.width  = `${(total/25)*100}%`;
+  document.getElementById('scoreTotalNum').textContent  = total;
+  ps.forEach((s,pi) => { document.getElementById(`bar-${pi}`).style.width=`${(s/5)*100}%`; document.getElementById(`num-${pi}`).textContent=`${s}/5`; });
 
-  // Score por pilar
-  pilarScores.forEach((s, pi) => {
-    document.getElementById(`bar-${pi}`).style.width = `${(s/5)*100}%`;
-    document.getElementById(`num-${pi}`).textContent = `${s}/5`;
-  });
-
-  // Total
-  document.getElementById('scoreTotalNum').textContent = total;
-
-  // Diagnóstico
-  const diag = document.getElementById('scoreDiagnostico');
-  let msg = '';
-  if (total >= 20) {
-    msg = '🟢 <strong>Base sólida.</strong> Você tem estrutura. O próximo passo é otimizar e escalar com inteligência — cada pilar que falta é uma alavanca de crescimento.';
-  } else if (total >= 12) {
-    msg = '🟡 <strong>Em construção.</strong> Você tem pontos fortes, mas lacunas que estão limitando o crescimento. Cada item em branco tem um custo real no seu resultado.';
-  } else if (total > 0) {
-    msg = '🔴 <strong>Atenção.</strong> Seu negócio está funcionando mais por esforço do que por estrutura. Isso cansa — e tem limite. É hora de construir as bases certas.';
-  }
-  if (msg && total > 0) {
-    diag.innerHTML = msg;
-    diag.classList.add('visible');
-  } else {
-    diag.classList.remove('visible');
+  if(total > 0 && !formSubmitted) {
+    const gate = document.getElementById('gateSection');
+    if(!gate.classList.contains('visible')) {
+      gate.classList.add('visible');
+      setTimeout(() => gate.scrollIntoView({ behavior:'smooth', block:'nearest' }), 100);
+    }
   }
 
-  // Preencher campos hidden
-  document.getElementById('hScoreTotal').value = total;
-  document.getElementById('hScoreFoco').value    = pilarScores[0];
-  document.getElementById('hScoreRota').value    = pilarScores[1];
-  document.getElementById('hScoreOferta').value  = pilarScores[2];
-  document.getElementById('hScoreNegocio').value = pilarScores[3];
-  document.getElementById('hScoreTracao').value  = pilarScores[4];
-  document.getElementById('hDiagnostico').value  =
-    total >= 20 ? 'Base sólida' : total >= 12 ? 'Em construção' : 'Atenção — estrutura frágil';
+  const nivelGeral = total >= 20 ? 'Base sólida' : total >= 12 ? 'Em construção' : 'Atenção — estrutura frágil';
+  const resumo   = PILARES.map((p,pi) => { const d=getDiag(p.letra,ps[pi]); return `${p.letra}-${p.nome}: ${ps[pi]}/5 (${d.nivel})`; }).join(' | ');
+  const completo = PILARES.map((p,pi) => { const d=getDiag(p.letra,ps[pi]); return `[${p.letra} - ${p.nome} | ${ps[pi]}/5 | ${d.nivel}]: ${d.texto} | Operação Rio: ${d.evento}`; }).join('\n\n');
+  document.getElementById('hScoreTotal').value   = total;
+  document.getElementById('hScoreFoco').value    = ps[0];
+  document.getElementById('hScoreRota').value    = ps[1];
+  document.getElementById('hScoreOferta').value  = ps[2];
+  document.getElementById('hScoreNegocio').value = ps[3];
+  document.getElementById('hScoreTracao').value  = ps[4];
+  document.getElementById('hResumo').value       = `${total}/25 — ${nivelGeral} | ${resumo}`;
+  document.getElementById('hCompleto').value     = completo;
 }
 
-// Form submit
+function renderDiag(ps, total) {
+  const diagSection = document.getElementById('diagSection');
+  diagSection.innerHTML = '';
+  PILARES.forEach((p,pi) => {
+    const d = getDiag(p.letra, ps[pi]);
+    const card = document.createElement('div');
+    card.className = `diag-card ${d.nivel}`;
+    card.innerHTML = `<div class="diag-card-header"><div class="diag-card-letra">${p.letra}</div><div class="diag-card-nome">${p.nome}</div><div class="diag-card-score">${ps[pi]}/5</div></div><div class="diag-card-texto">${d.texto}</div><div class="diag-card-evento">→ ${d.evento}</div>`;
+    diagSection.appendChild(card);
+  });
+  diagSection.classList.add('visible');
+
+  const cta = getCTA(total);
+  document.getElementById('ctaTitulo').innerHTML = cta.titulo;
+  document.getElementById('ctaCorpo').innerHTML  = cta.corpo;
+  const ctaEl = document.getElementById('ctaSection');
+  ctaEl.classList.add('visible');
+  setTimeout(() => ctaEl.scrollIntoView({ behavior:'smooth' }), 200);
+}
+
 document.getElementById('leadForm').addEventListener('submit', async function(e) {
   e.preventDefault();
-  const btn = document.getElementById('btnEnviar');
-  btn.disabled = true;
-  btn.textContent = 'Enviando...';
-
-  const data = new FormData(this);
-
+  const btn = document.getElementById('btnLiberar');
+  btn.disabled = true; btn.textContent = 'Liberando...';
+  const ps = getScores();
+  const total = ps.reduce((a,b)=>a+b,0);
   try {
-    const res = await fetch(this.action, {
-      method: 'POST',
-      body: data,
-      headers: { 'Accept': 'application/json' }
-    });
-    if (res.ok) {
-      document.getElementById('formSection').style.display = 'none';
-      document.getElementById('successSection').classList.add('visible');
-      document.getElementById('successSection').scrollIntoView({ behavior: 'smooth' });
+    const res = await fetch(this.action, { method:'POST', body:new FormData(this), headers:{'Accept':'application/json'} });
+    if(res.ok) {
+      formSubmitted = true;
+      document.getElementById('gateSection').style.display = 'none';
+      renderDiag(ps, total);
     } else {
-      btn.disabled = false;
-      btn.textContent = 'Enviar meu diagnóstico';
+      btn.disabled = false; btn.textContent = '🔓 Liberar meu diagnóstico';
       alert('Erro ao enviar. Tente novamente.');
     }
   } catch {
-    btn.disabled = false;
-    btn.textContent = 'Enviar meu diagnóstico';
+    btn.disabled = false; btn.textContent = '🔓 Liberar meu diagnóstico';
     alert('Erro de conexão. Tente novamente.');
   }
 });
 
-// Init
 updateScore();
 </script>
 </body>
