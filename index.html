@@ -220,7 +220,7 @@
     </form>
   </div>
 
-  <div class="diag-section" id="diagSection"></div>
+  <div id="diagTitulo" style="display:none; margin-top:28px; margin-bottom:4px;"><span style="font-family:'Barlow Condensed',sans-serif; font-size:14px; font-weight:700; letter-spacing:3px; color:#C9A84C; text-transform:uppercase;">Diagnóstico por Pilar</span></div><div class="diag-section" id="diagSection"></div>
 
   <div class="cta-section" id="ctaSection">
     <div class="cta-tag">Operação Rio · 15 de Maio de 2026</div>
@@ -415,14 +415,15 @@ function renderDiag(ps, total) {
     card.innerHTML = `<div class="diag-card-header"><div class="diag-card-letra">${p.letra}</div><div class="diag-card-nome">${p.nome}</div><div class="diag-card-score">${ps[pi]}/5</div></div><div class="diag-card-texto">${d.texto}</div><div class="diag-card-evento">→ ${d.evento}</div>`;
     diagSection.appendChild(card);
   });
+  document.getElementById('diagTitulo').style.display = 'block';
   diagSection.classList.add('visible');
+  setTimeout(() => document.getElementById('diagTitulo').scrollIntoView({ behavior:'smooth', block:'start' }), 200);
 
   const cta = getCTA(total);
   document.getElementById('ctaTitulo').innerHTML = cta.titulo;
   document.getElementById('ctaCorpo').innerHTML  = cta.corpo;
   const ctaEl = document.getElementById('ctaSection');
   ctaEl.classList.add('visible');
-  setTimeout(() => ctaEl.scrollIntoView({ behavior:'smooth' }), 200);
 }
 
 document.getElementById('leadForm').addEventListener('submit', async function(e) {
