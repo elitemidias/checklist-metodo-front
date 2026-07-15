@@ -1,6 +1,7 @@
 "use client";
 
 import { FormEvent, useEffect, useMemo, useRef, useState } from "react";
+import { trackMetaEvent } from "@/components/MetaPixel";
 
 type Option = { label: string; value: string | number; detail?: string };
 type QuizStep = {
@@ -303,6 +304,7 @@ export default function Home() {
       // O diagnóstico não fica bloqueado se o serviço de captura estiver indisponível.
     }
     setSubmitting(false);
+    trackMetaEvent("Lead");
     setPhase("result");
     window.requestAnimationFrame(() => window.scrollTo({ top: 0, behavior: "auto" }));
   }
@@ -433,14 +435,14 @@ export default function Home() {
                 </div>
               </div>
               <ul><li>Mapa de Crescimento para os próximos 90 dias</li><li>Estratégias específicas para o seu negócio</li><li>Acesso completo ao Desafio Perfil que Vende</li></ul>
-              <a className="primary-button green-button cta-copy-button" href={whatsappHref} target="_blank" rel="noreferrer">Agendar minha reunião <span>→</span></a>
+              <a className="primary-button green-button cta-copy-button" href={whatsappHref} target="_blank" rel="noreferrer" onClick={() => trackMetaEvent("Schedule")}>Agendar minha reunião <span>→</span></a>
             </div>
             <div className="cta-card">
               <div className="ticket-visual"><img src="/images/passe-crescimento.png" alt="Passe estratégico gratuito para uma reunião com a Elite Mídias"/><span>Passe gratuito</span></div>
               <div className="mini-score"><span>Seu ponto de partida</span><strong>{totalScore}/100</strong></div>
               <h3>Reserve seu Mapa de Crescimento E.L.I.T.E.</h3>
               <p>Uma conversa estratégica aplicada ao seu negócio. Sem apresentação genérica e sem compromisso de contratação.</p>
-              <a className="primary-button green-button" href={whatsappHref} target="_blank" rel="noreferrer">Quero meu plano + bônus <span>→</span></a>
+              <a className="primary-button green-button" href={whatsappHref} target="_blank" rel="noreferrer" onClick={() => trackMetaEvent("Schedule")}>Quero meu plano + bônus <span>→</span></a>
               <button className="pdf-button report-download" onClick={() => window.print()}>Salvar meu relatório em PDF</button>
               <div className="contact-links"><a href="https://instagram.com/nandoborbaaa" target="_blank" rel="noreferrer">Instagram · @nandoborbaaa</a><a href="https://wa.me/5521999468989" target="_blank" rel="noreferrer">WhatsApp · (21) 99946-8989</a></div>
               <small>Sem custo. As agendas são liberadas conforme disponibilidade e aderência do negócio.</small>
@@ -465,7 +467,7 @@ export default function Home() {
             <span>Seu próximo passo</span>
             <h2>Agende a reunião e receba um plano construído para o seu negócio.</h2>
             <p>Você sai da reunião com o seu Mapa de Crescimento, estratégias específicas para avançar nos próximos 90 dias e acesso ao Desafio Perfil que Vende.</p>
-            <a className="primary-button green-button" href={whatsappHref} target="_blank" rel="noreferrer">Quero agendar e receber meu mapa <span>→</span></a>
+            <a className="primary-button green-button" href={whatsappHref} target="_blank" rel="noreferrer" onClick={() => trackMetaEvent("Schedule")}>Quero agendar e receber meu mapa <span>→</span></a>
             <small>Reunião estratégica gratuita de 45 minutos com a Elite Mídias.</small>
           </section>
 
