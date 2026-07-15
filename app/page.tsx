@@ -1,6 +1,6 @@
 "use client";
 
-import { FormEvent, useMemo, useState } from "react";
+import { FormEvent, useMemo, useRef, useState } from "react";
 
 type Option = { label: string; value: string | number; detail?: string };
 type QuizStep = {
@@ -202,6 +202,19 @@ function getBand(score: number) {
   return { name: "Pronto para escalar", title: "Sua empresa tem uma boa base. Agora o jogo é escalar com eficiência e controle.", copy: "Oportunidades de crescimento estão menos no básico e mais em otimização: mensagem, conversão, CAC e capacidade de repetir o que já funciona." };
 }
 
+function OptionIcon({ index }: { index: number }) {
+  const icon = index % 5;
+  return (
+    <svg className="option-icon" viewBox="0 0 24 24" aria-hidden="true">
+      {icon === 0 && <><circle cx="12" cy="12" r="8"/><path d="M8 12h8"/></>}
+      {icon === 1 && <><path d="M4 17c3-7 6 0 9-7s5-3 7-5"/><circle cx="5" cy="17" r="1.5"/><circle cx="13" cy="10" r="1.5"/></>}
+      {icon === 2 && <><path d="M12 3l7 3v5c0 4.7-2.8 7.8-7 10-4.2-2.2-7-5.3-7-10V6l7-3z"/><path d="M8.5 12l2.2 2.2 4.8-5"/></>}
+      {icon === 3 && <><path d="M4 18V6"/><path d="M4 18h16"/><path d="M7 15l4-4 3 2 5-7"/><path d="M15.5 6H19v3.5"/></>}
+      {icon === 4 && <><path d="M12 3v4M12 17v4M3 12h4M17 12h4"/><path d="M6 6l2.5 2.5M15.5 15.5L18 18M18 6l-2.5 2.5M8.5 15.5L6 18"/><circle cx="12" cy="12" r="2.5"/></>}
+    </svg>
+  );
+}
+
 export default function Home() {
   const [started, setStarted] = useState(false);
   const [stepIndex, setStepIndex] = useState(0);
@@ -209,6 +222,8 @@ export default function Home() {
   const [phase, setPhase] = useState<"quiz" | "gate" | "result">("quiz");
   const [lead, setLead] = useState({ name: "", company: "", whatsapp: "", email: "" });
   const [submitting, setSubmitting] = useState(false);
+  const [soundOn, setSoundOn] = useState(true);
+  const audioContextRef = useRef<AudioContext | null>(null);
 
   const pillarScores = useMemo(() => pillars.map((pillar) => {
     const related = scoredSteps.filter((step) => step.pillar === pillar.id);
@@ -226,7 +241,26 @@ export default function Home() {
   const current = allSteps[stepIndex];
   const progress = phase === "quiz" ? Math.round(((stepIndex + 1) / allSteps.length) * 100) : 100;
 
-  function answer(value: string | number) {
+  function playAnswerTone(index: number) {
+    if (!soundOn || typeof window === "undefined") return;
+    const AudioContextClass = window.AudioContext || (window as typeof window & { webkitAudioContext?: typeof AudioContext }).webkitAudioContext;
+    if (!AudioContextClass) return;
+    const context = audioContextRef.current ?? new AudioContextClass();
+    audioContextRef.current = context;
+    const oscillator = context.createOscillator();
+    const gain = context.createGain();
+    oscillator.type = "sine";
+    oscillator.frequency.setValueAtTime(360 + index * 70, context.currentTime);
+    gain.gain.setValueAtTime(.0001, context.currentTime);
+    gain.gain.exponentialRampToValueAtTime(.07, context.currentTime + .015);
+    gain.gain.exponentialRampToValueAtTime(.0001, context.currentTime + .11);
+    oscillator.connect(gain).connect(context.destination);
+    oscillator.start();
+    oscillator.stop(context.currentTime + .12);
+  }
+
+  function answer(value: string | number, index: number) {
+    playAnswerTone(index);
     setAnswers((previous) => ({ ...previous, [current.id]: value }));
     window.setTimeout(() => {
       if (stepIndex === allSteps.length - 1) setPhase("gate");
@@ -266,26 +300,31 @@ export default function Home() {
     }
     setSubmitting(false);
     setPhase("result");
-    window.scrollTo({ top: 0, behavior: "smooth" });
+    window.requestAnimationFrame(() => window.scrollTo({ top: 0, behavior: "auto" }));
   }
 
   const whatsappText = encodeURIComponent(`Olá! Sou ${lead.name || "um empresário"}, da ${lead.company || "minha empresa"}. Fiz o Diagnóstico E.L.I.T.E., meu score foi ${totalScore}/100 (${band.name}) e meu principal gargalo foi ${priorities[0]?.name}. Faturamento: ${answers.revenue}. Quero agendar meu Mapa de Crescimento.`);
   const whatsappHref = `https://wa.me/5521999468989?text=${whatsappText}`;
+
+  function startDiagnostic() {
+    setStarted(true);
+    window.scrollTo({ top: 0, behavior: "auto" });
+  }
 
   if (!started) {
     return (
       <main className="site-shell">
         <header className="topbar">
           <img src="/images/logo-elite.png" alt="Elite Mídias" className="brand-logo" />
-          <span className="topbar-note"><i /> Diagnóstico estratégico gratuito</span>
+          <div className="topbar-actions"><span className="topbar-note"><i /> Diagnóstico estratégico gratuito</span><button className="header-cta" onClick={startDiagnostic}>Começar agora</button></div>
         </header>
 
         <section className="hero">
           <div className="hero-copy">
             <div className="kicker"><span>Diagnóstico E.L.I.T.E.</span> · Para empresas que já vendem</div>
             <h1>Descubra o que impede sua empresa de <em>crescer com previsibilidade.</em></h1>
-            <p className="hero-lead">Em menos de 3 minutos, identifique onde sua empresa perde oportunidades entre marketing, vendas e escala — e receba as 3 prioridades que mais podem destravar o próximo nível.</p>
-            <button className="primary-button" onClick={() => setStarted(true)}>
+            <p className="hero-lead">Em menos de 3 minutos, identifique onde sua empresa perde oportunidades entre marketing, vendas e escala. Ao final, receba seu <strong>Relatório de Oportunidades</strong> com as alavancas criadas para ajudar o seu negócio a aumentar o faturamento de forma exponencial.</p>
+            <button className="primary-button green-button" onClick={startDiagnostic}>
               Fazer meu diagnóstico <span>→</span>
             </button>
             <div className="trust-row">
@@ -313,13 +352,17 @@ export default function Home() {
           </div>
         </section>
 
-        <section className="pillars-strip" aria-label="Áreas analisadas">
-          {pillars.map((pillar) => (
-            <div key={pillar.id} className="pillar-mini">
-              <b>{pillar.letter}</b>
-              <span><strong>{pillar.name}</strong><small>{pillar.blurb}</small></span>
-            </div>
-          ))}
+        <section className="method-section" aria-label="Áreas analisadas pelo método E.L.I.T.E.">
+          <div className="section-heading method-heading"><span>O sistema por trás do diagnóstico</span><h2>Cinco áreas conectadas. Um único objetivo: crescimento.</h2></div>
+          <div className="method-system">
+            <div className="method-core"><small>Diagnóstico</small><strong>E.L.I.T.E.</strong><i /></div>
+            {pillars.map((pillar, index) => (
+              <article key={pillar.id} className={`method-node node-${index + 1}`} style={{ "--delay": `${index * .16}s` } as React.CSSProperties}>
+                <b>{pillar.letter}</b><span><strong>{pillar.name}</strong><small>{pillar.blurb}</small></span>
+              </article>
+            ))}
+          </div>
+          <button className="primary-button green-button method-cta" onClick={startDiagnostic}>Quero descobrir minhas oportunidades <span>→</span></button>
         </section>
 
         <section className="how-it-works">
@@ -328,7 +371,7 @@ export default function Home() {
             <h2>Um raio-x da sua máquina de crescimento.</h2>
           </div>
           <div className="steps-grid">
-            <article><b>01</b><h3>Você responde</h3><p>Perguntas objetivas sobre o que acontece hoje — sem exigir planilhas.</p></article>
+            <article><b>01</b><h3>Você responde</h3><p>Perguntas objetivas sobre o que acontece hoje, sem exigir planilhas.</p></article>
             <article><b>02</b><h3>O sistema cruza</h3><p>Seu estágio de receita com cinco áreas que influenciam crescimento.</p></article>
             <article><b>03</b><h3>Você prioriza</h3><p>Recebe score, gargalos e próximos movimentos em ordem de impacto.</p></article>
           </div>
@@ -344,7 +387,7 @@ export default function Home() {
       <main className="result-page">
         <header className="quiz-header result-header">
           <img src="/images/logo-elite.png" alt="Elite Mídias" className="brand-logo" />
-          <span>Diagnóstico concluído</span>
+          <div className="result-header-actions"><span>Diagnóstico concluído</span><button className="pdf-button" onClick={() => window.print()}>Salvar relatório em PDF</button></div>
         </header>
 
         <section className="result-hero">
@@ -388,17 +431,19 @@ export default function Home() {
 
           <section className="final-cta">
             <div className="cta-copy">
-              <span>Convite personalizado</span>
-              <h2>Saia de uma conversa de 45 minutos com um <em>Mapa de Crescimento para os próximos 90 dias.</em></h2>
-              <p>Vamos olhar seu diagnóstico, encontrar as três alavancas com maior potencial para acelerar receita e organizar um plano de ação prioritário — mesmo que você decida não contratar a Elite Mídias.</p>
-              <ul><li>Análise do seu funil atual</li><li>Prioridades por impacto e esforço</li><li>Próximos passos claros para o trimestre</li></ul>
+              <span>Seu passe estratégico gratuito</span>
+              <h2>O relatório mostra o problema. A reunião transforma as oportunidades em um <em>plano executável.</em></h2>
+              <p>Reserve uma Análise Estratégica de 45 minutos com a Elite Mídias. Vamos abrir o seu diagnóstico, identificar as decisões com maior potencial de impacto e desenhar o caminho dos próximos 90 dias. Não deixe esse relatório virar apenas mais uma informação salva.</p>
+              <ul><li>Diagnóstico do funil com um especialista</li><li>Prioridades organizadas por impacto e esforço</li><li>Mapa de Crescimento para os próximos 90 dias</li></ul>
             </div>
             <div className="cta-card">
+              <div className="ticket-visual"><img src="/images/passe-crescimento.png" alt="Passe estratégico gratuito para uma reunião com a Elite Mídias"/><span>Passe gratuito</span></div>
               <div className="mini-score"><span>Seu ponto de partida</span><strong>{totalScore}/100</strong></div>
-              <h3>Mapa de Crescimento E.L.I.T.E.</h3>
-              <p>Uma análise estratégica, não uma apresentação comercial genérica.</p>
-              <a className="primary-button" href={whatsappHref} target="_blank" rel="noreferrer">Agendar minha análise <span>→</span></a>
-              <small>Sem custo · Sujeito à disponibilidade e aderência do negócio</small>
+              <h3>Reserve seu Mapa de Crescimento E.L.I.T.E.</h3>
+              <p>Uma conversa estratégica aplicada ao seu negócio. Sem apresentação genérica e sem compromisso de contratação.</p>
+              <a className="primary-button green-button" href={whatsappHref} target="_blank" rel="noreferrer">Quero reservar meu passe <span>→</span></a>
+              <button className="pdf-button report-download" onClick={() => window.print()}>Salvar meu relatório em PDF</button>
+              <small>Sem custo. As agendas são liberadas conforme disponibilidade e aderência do negócio.</small>
             </div>
           </section>
 
@@ -413,7 +458,7 @@ export default function Home() {
     <main className="quiz-page">
       <header className="quiz-header">
         <img src="/images/logo-elite.png" alt="Elite Mídias" className="brand-logo" />
-        <div className="quiz-progress-meta"><span>{phase === "gate" ? "Diagnóstico calculado" : `Pergunta ${stepIndex + 1} de ${allSteps.length}`}</span><strong>{progress}%</strong></div>
+        <div className="quiz-header-tools"><button className="sound-toggle" onClick={() => setSoundOn((value) => !value)} aria-pressed={soundOn} aria-label={soundOn ? "Desativar sons do quiz" : "Ativar sons do quiz"}>{soundOn ? "◉ Som" : "○ Som"}</button><div className="quiz-progress-meta"><span>{phase === "gate" ? "Diagnóstico calculado" : `Pergunta ${stepIndex + 1} de ${allSteps.length}`}</span><strong>{progress}%</strong></div></div>
       </header>
       <div className="progress-track"><i style={{ width: `${progress}%` }} /></div>
 
@@ -428,8 +473,9 @@ export default function Home() {
               {current.options.map((option, index) => {
                 const selected = answers[current.id] === option.value;
                 return (
-                  <button key={`${current.id}-${index}`} className={selected ? "option selected" : "option"} onClick={() => answer(option.value)} role="radio" aria-checked={selected}>
+                  <button key={`${current.id}-${index}`} className={selected ? "option selected" : "option"} onClick={() => answer(option.value, index)} role="radio" aria-checked={selected}>
                     <b>{String.fromCharCode(65 + index)}</b>
+                    <OptionIcon index={index} />
                     <span><strong>{option.label}</strong>{option.detail && <small>{option.detail}</small>}</span>
                     <i>{selected ? "✓" : "→"}</i>
                   </button>
@@ -446,22 +492,22 @@ export default function Home() {
             <div className="gate-badge">Diagnóstico calculado</div>
             <div className="locked-preview">
               <div className="blurred-score" aria-hidden="true">{totalScore}</div>
-              <span>Seu score e suas 3 prioridades estão prontos.</span>
+              <span>Seu Relatório de Oportunidades, score e 3 prioridades estão prontos.</span>
             </div>
-            <h1>Para quem devemos entregar o diagnóstico?</h1>
+            <h1>Para quem devemos entregar o Relatório de Oportunidades?</h1>
             <p>Preencha seus dados profissionais para liberar o resultado completo. A Elite Mídias não envia spam.</p>
             <form onSubmit={submitLead} className="lead-form">
               <label><span>Seu nome</span><input required autoComplete="name" value={lead.name} onChange={(event) => setLead({ ...lead, name: event.target.value })} placeholder="Como podemos chamar você?" /></label>
               <label><span>Empresa</span><input required autoComplete="organization" value={lead.company} onChange={(event) => setLead({ ...lead, company: event.target.value })} placeholder="Nome do negócio" /></label>
               <label><span>WhatsApp</span><input required autoComplete="tel" inputMode="tel" value={lead.whatsapp} onChange={(event) => setLead({ ...lead, whatsapp: event.target.value })} placeholder="(21) 99999-9999" /></label>
               <label><span>E-mail profissional</span><input required type="email" autoComplete="email" value={lead.email} onChange={(event) => setLead({ ...lead, email: event.target.value })} placeholder="voce@empresa.com.br" /></label>
-              <button className="primary-button" type="submit" disabled={submitting}>{submitting ? "Preparando seu diagnóstico..." : "Ver meu diagnóstico completo"}<span>→</span></button>
+              <button className="primary-button green-button" type="submit" disabled={submitting}>{submitting ? "Preparando seu relatório..." : "Ver meu Relatório de Oportunidades"}<span>→</span></button>
               <small>Ao continuar, você concorda em receber o diagnóstico e um contato da Elite Mídias sobre o resultado.</small>
             </form>
           </div>
           <aside className="gate-summary">
-            <span>O que você vai receber</span>
-            <h2>Clareza antes de investir mais.</h2>
+            <span>Seu entregável</span>
+            <h2>Um relatório para enxergar onde está o dinheiro escondido.</h2>
             <div><b>01</b><p><strong>Score de maturidade</strong>Visão simples do estágio atual.</p></div>
             <div><b>02</b><p><strong>Leitura por pilar</strong>Onde o funil perde mais força.</p></div>
             <div><b>03</b><p><strong>Plano prioritário</strong>As três alavancas para atacar primeiro.</p></div>
