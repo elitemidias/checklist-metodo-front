@@ -34,7 +34,7 @@ const contextSteps: QuizStep[] = [
     options: [
       { label: "Serviços profissionais", value: "Serviços profissionais" },
       { label: "Clínica, saúde ou estética", value: "Clínica, saúde ou estética" },
-      { label: "Comércio ou e-commerce", value: "Comércio ou e-commerce" },
+      { label: "Comércio ou loja virtual", value: "Comércio ou loja virtual" },
       { label: "Educação ou infoproduto", value: "Educação ou infoproduto" },
       { label: "Outro modelo", value: "Outro" },
     ],
@@ -43,7 +43,7 @@ const contextSteps: QuizStep[] = [
     id: "goal",
     eyebrow: "Objetivo prioritário",
     question: "Qual resultado mais faria diferença nos próximos 90 dias?",
-    support: "Escolha o que é prioridade agora — não o que seria bom ter um dia.",
+    support: "Escolha o que é prioridade agora. Pense no que mais faria diferença nos próximos 90 dias.",
     options: [
       { label: "Gerar mais oportunidades qualificadas", value: "Mais oportunidades qualificadas" },
       { label: "Vender com mais previsibilidade", value: "Mais previsibilidade" },
@@ -64,7 +64,7 @@ const segmentQuestionBanks: Record<string, QuizStep[]> = {
     scored("leads-channel","leads","Origem das oportunidades","Como novas oportunidades comerciais chegam até você hoje?","Considere oportunidades com perfil e intenção, não apenas seguidores ou contatos.",["Quase exclusivamente por indicação","Por ações isoladas e imprevisíveis","Um canal principal alimenta a agenda","Temos canais previsíveis com custo conhecido"]),
     scored("leads-demand","leads","Previsibilidade","Se as indicações parassem por 60 dias, sua agenda comercial continuaria cheia?","Essa resposta revela se existe uma máquina de aquisição ou apenas reputação acumulada.",["A agenda praticamente pararia","Teríamos uma queda forte","Manteríamos parte do volume","A demanda continuaria previsível"]),
     scored("transformation-speed","transformation","Momento da verdade","O que acontece quando alguém pede informações ou solicita uma proposta?","Velocidade e qualificação determinam quanto interesse vira reunião.",["Cada pessoa responde de um jeito","Respondemos, mas sem padrão ou velocidade","Temos roteiro, responsável e algum controle","Resposta, qualificação e agendamento são rápidos e medidos"]),
-    scored("transformation-close","transformation","Da reunião ao contrato","Você conhece a conversão entre reunião, proposta e contrato fechado?","Sem essas taxas, fica difícil saber onde o dinheiro está escapando.",["Não conhecemos as taxas","Temos uma percepção aproximada","Acompanhamos parte do pipeline","Medimos cada etapa e fazemos follow-up estruturado"]),
+    scored("transformation-close","transformation","Da reunião ao contrato","Você conhece a conversão entre reunião, proposta e contrato fechado?","Sem essas taxas, fica difícil saber onde o dinheiro está escapando.",["Não conhecemos as taxas","Temos uma percepção aproximada","Acompanhamos parte do pipeline","Medimos cada etapa e fazemos acompanhamento estruturado"]),
     scored("image-proof","image","Redução de risco","Sua comunicação mostra casos que provam a transformação entregue?","Casos específicos antecipam confiança e encurtam a decisão.",["Quase não mostramos provas","Temos depoimentos dispersos ou antigos","Usamos bons casos em marketing e vendas","Temos um sistema contínuo de casos, provas e autoridade"]),
     scored("strategy-economics","strategy","Crescimento rentável","Você sabe quais serviços, perfis de cliente e contratos geram mais margem?","Escalar a oferta errada pode aumentar trabalho sem aumentar lucro.",["Não temos essa visão","Sabemos por sensação","Conhecemos margem e ticket das principais ofertas","Margem, capacidade e LTV orientam o que vendemos"]),
     scored("evolution-data","evolution","Visão do funil","Marketing e comercial enxergam os mesmos números do primeiro contato ao contrato?","Uma única visão evita que cada área culpe a outra.",["Os dados são fragmentados","Existem relatórios, mas pouca ação","Temos uma visão comum dos principais indicadores","Os dados orientam verba, mensagem e processo comercial"]),
@@ -79,10 +79,10 @@ const segmentQuestionBanks: Record<string, QuizStep[]> = {
     scored("transformation-show","transformation","Agendamento que vira receita","Você acompanha confirmação, comparecimento e retorno do paciente?","Agenda cheia não significa faturamento se houver faltas e pouco retorno.",["Não acompanhamos essas taxas","Confirmamos manualmente, sem visão do funil","Medimos agendamento e comparecimento","Temos confirmação, recuperação de faltas e reativação estruturadas"]),
     scored("image-proof","image","Confiança clínica","Sua comunicação usa provas e autoridade de forma ética e convincente?","Depoimentos, bastidores, credenciais e educação reduzem insegurança.",["Quase não mostramos provas","Temos conteúdos e provas dispersos","Usamos provas com consistência e cuidado","Autoridade e confiança são construídas continuamente"]),
     scored("strategy-economics","strategy","Receita saudável","Você sabe quais procedimentos, agendas e origens de paciente geram mais margem e recorrência?","Crescer ocupando a agenda errada pode reduzir o lucro.",["Não temos essa visão","Sabemos por percepção","Conhecemos ticket e margem dos principais procedimentos","Margem, retorno e recorrência orientam campanhas e agenda"]),
-    scored("evolution-data","evolution","Raio-x da jornada","Você conhece as taxas entre contato, agendamento, comparecimento e fechamento?","Esse funil mostra exatamente onde pacientes e receita estão escapando.",["Não conhecemos as taxas","Temos números separados e pouco confiáveis","Acompanhamos as principais etapas","Dados orientam recepção, mídia e oferta semanalmente"]),
+    scored("evolution-data","evolution","Raio X da jornada","Você conhece as taxas entre contato, agendamento, comparecimento e fechamento?","Esse funil mostra exatamente onde pacientes e receita estão escapando.",["Não conhecemos as taxas","Temos números separados e pouco confiáveis","Acompanhamos as principais etapas","Dados orientam recepção, mídia e oferta semanalmente"]),
     scored("evolution-scale","evolution","Capacidade de atendimento","Se os agendamentos dobrassem, equipe e agenda sustentariam a experiência?","Escala sem capacidade gera espera, falhas e perda de reputação.",["A operação entraria em colapso","Atenderíamos com muito improviso","Sustentaríamos com alguns ajustes","Temos capacidade, processos e experiência padronizada"]),
   ],
-  "Comércio ou e-commerce": [
+  "Comércio ou loja virtual": [
     scored("strategy-goal","strategy","Meta de crescimento","Existe uma meta clara de faturamento, pedidos e margem para os próximos 90 dias?","Crescer vendas sem proteger margem pode piorar o caixa.",["Não existe uma meta definida","Existe meta de faturamento, sem conta de pedidos e margem","Temos metas, com acompanhamento irregular","Pedidos, ticket, margem e verba orientam a operação"]),
     scored("image-offer","image","Desejo pelo produto","O cliente entende rapidamente por que comprar de você e não do concorrente?","Produto, oferta, experiência e confiança precisam vencer a comparação.",["Competimos quase só por preço","O diferencial exige muita explicação","A proposta de valor é clara na maioria dos canais","Marca e oferta geram preferência e sustentam margem"]),
     scored("leads-channel","leads","Tráfego que compra","De onde vêm os clientes que realmente fazem pedidos?","Alcance sem compra não sustenta varejo.",["Dependemos de movimento orgânico ou indicação","Temos ações pontuais sem previsibilidade","Um canal principal gera vendas com frequência","Temos canais previsíveis e custo por compra conhecido"]),
@@ -92,7 +92,7 @@ const segmentQuestionBanks: Record<string, QuizStep[]> = {
     scored("image-proof","image","Confiança para comprar","Sua comunicação mostra avaliações, demonstrações e provas do produto?","Prova reduz risco, principalmente quando o cliente não pode tocar no produto.",["Quase não mostramos provas","As provas são dispersas ou pouco visíveis","Usamos boas avaliações e demonstrações","Prova, conteúdo e comunidade alimentam vendas continuamente"]),
     scored("strategy-economics","strategy","Mix lucrativo","Você sabe quais produtos, categorias e clientes geram mais margem e recompra?","Escalar campeões de faturamento que não dão lucro é uma armadilha.",["Não temos essa visão","Sabemos por sensação","Conhecemos margem e giro dos principais produtos","Margem, giro, estoque e LTV orientam campanhas"]),
     scored("evolution-data","evolution","Jornada completa","Você acompanha visita, carrinho, compra, recompra e receita por canal?","O mapa completo mostra onde otimizar antes de aumentar verba.",["Os dados são fragmentados","Acompanhamos vendas, mas não a jornada","Temos uma visão dos principais indicadores","Dados orientam mídia, oferta, estoque e retenção"]),
-    scored("evolution-scale","evolution","Operação de escala","Se os pedidos dobrassem, estoque, atendimento e entrega sustentariam a promessa?","A experiência pós-compra define reputação e recompra.",["A operação entraria em colapso","Cresceríamos com muito improviso","Sustentaríamos com alguns ajustes","Temos estoque, processos e logística preparados"]),
+    scored("evolution-scale","evolution","Operação de escala","Se os pedidos dobrassem, estoque, atendimento e entrega sustentariam a promessa?","A experiência após a compra define reputação e recompra.",["A operação entraria em colapso","Cresceríamos com muito improviso","Sustentaríamos com alguns ajustes","Temos estoque, processos e logística preparados"]),
   ],
   "Educação ou infoproduto": [
     scored("strategy-goal","strategy","Meta de matrículas","Existe uma meta clara de matrículas, receita e margem para os próximos 90 dias?","A meta precisa conectar audiência, leads, conversão e capacidade de entrega.",["Não existe uma meta definida","Existe desejo de vender mais, sem conta reversa","Temos meta e calendário, com acompanhamento irregular","Meta, funil e calendário orientam cada campanha"]),
@@ -100,10 +100,10 @@ const segmentQuestionBanks: Record<string, QuizStep[]> = {
     scored("leads-channel","leads","Audiência que avança","Como novos leads qualificados entram no seu funil?","Seguidores só viram ativo quando avançam para uma próxima etapa.",["Dependemos da audiência atual ou de indicação","Fazemos captações pontuais","Um canal alimenta o funil com frequência","Temos canais previsíveis e custo por lead qualificado"]),
     scored("leads-demand","leads","Demanda previsível","Você consegue gerar leads fora de lançamentos ou picos de conteúdo?","Uma operação madura não recomeça do zero em cada campanha.",["A demanda desaparece fora dos lançamentos","Dependemos muito do orgânico","Mantemos captação em alguns períodos","Temos aquisição contínua e previsível"]),
     scored("transformation-funnel","transformation","Do lead à matrícula","Existe uma sequência clara entre captura, conteúdo, oferta e matrícula?","Cada transição precisa elevar consciência e reduzir objeções.",["O lead recebe ações desconectadas","Existe uma sequência informal","Temos funil e automações principais","O funil é medido e otimizado em cada etapa"]),
-    scored("transformation-followup","transformation","Decisão recuperada","O que acontece com quem demonstrou interesse e não comprou?","Follow-up e recuperação evitam perder uma audiência já aquecida.",["Nada estruturado acontece","Fazemos contatos pontuais","Temos remarketing e sequências básicas","Recuperação, vendas e nutrição são integradas e medidas"]),
+    scored("transformation-followup","transformation","Decisão recuperada","O que acontece com quem demonstrou interesse e não comprou?","Acompanhamento e recuperação evitam perder uma audiência já aquecida.",["Nada estruturado acontece","Fazemos contatos pontuais","Temos remarketing e sequências básicas","Recuperação, vendas e nutrição são integradas e medidas"]),
     scored("image-proof","image","Prova de transformação","Sua comunicação mostra alunos reais, progresso e aplicação prática?","Prova específica torna a promessa concreta.",["Quase não mostramos provas","Temos depoimentos dispersos","Usamos bons casos em campanhas e páginas","Prova e comunidade alimentam autoridade continuamente"]),
     scored("strategy-economics","strategy","Economia da oferta","Você conhece CAC, conversão, reembolso, ticket e LTV por oferta?","Faturamento de lançamento pode esconder uma operação pouco saudável.",["Não conhecemos esses números","Acompanhamos apenas faturamento e ROAS","Conhecemos os principais indicadores","Economia da oferta orienta verba, preço e calendário"]),
-    scored("evolution-data","evolution","Visão de jornada","Marketing, vendas e entrega enxergam a mesma jornada do lead ao aluno ativo?","A experiência pós-venda também influencia prova, retenção e escala.",["Os dados são fragmentados","Existem relatórios separados","Temos uma visão comum dos indicadores principais","Dados orientam aquisição, produto e retenção"]),
+    scored("evolution-data","evolution","Visão de jornada","Marketing, vendas e entrega enxergam a mesma jornada do lead ao aluno ativo?","A experiência após a venda também influencia prova, retenção e escala.",["Os dados são fragmentados","Existem relatórios separados","Temos uma visão comum dos indicadores principais","Dados orientam aquisição, produto e retenção"]),
     scored("evolution-scale","evolution","Entrega em escala","Se as matrículas dobrassem, suporte e experiência manteriam a qualidade?","Escalar aquisição sem escalar entrega aumenta cancelamento e destrói prova.",["A entrega entraria em colapso","Cresceríamos com muito improviso","Sustentaríamos com alguns ajustes","Temos produto, suporte e comunidade preparados"]),
   ],
   "Outro": [
@@ -124,7 +124,7 @@ const pillars = [
   { id: "strategy", letter: "E", name: "Estratégia", blurb: "Direção comercial, cliente ideal e prioridades.", action: "Definir uma meta de 90 dias e alinhar oferta, público e canal a um único objetivo de receita." },
   { id: "leads", letter: "L", name: "Leads", blurb: "Aquisição previsível e eficiência de mídia.", action: "Concentrar investimento no canal com melhor sinal de compra e medir custo por oportunidade, não só por lead." },
   { id: "image", letter: "I", name: "Imagem & Oferta", blurb: "Posicionamento, valor percebido e prova.", action: "Reformular a mensagem central com diferencial claro, prova específica e uma oferta difícil de comparar por preço." },
-  { id: "transformation", letter: "T", name: "Transformação", blurb: "Processo comercial e conversão em receita.", action: "Criar velocidade de resposta, roteiro de qualificação e follow-up com taxas visíveis em cada etapa do funil." },
+  { id: "transformation", letter: "T", name: "Transformação", blurb: "Processo comercial e conversão em receita.", action: "Criar velocidade de resposta, roteiro de qualificação e acompanhamento com taxas visíveis em cada etapa do funil." },
   { id: "evolution", letter: "E", name: "Evolução & Escala", blurb: "Dados, capacidade e otimização contínua.", action: "Unificar os números de marketing e vendas em um painel simples para decidir onde investir e o que corrigir." },
 ];
 
@@ -292,7 +292,7 @@ export default function Home() {
     payload.append("faturamento", String(answers.revenue));
     payload.append("segmento", String(answers.segment));
     payload.append("objetivo", String(answers.goal));
-    payload.append("score_elite", `${totalScore}/100 — ${band.name}`);
+    payload.append("score_elite", `${totalScore}/100 | ${band.name}`);
     payload.append("prioridades", priorities.map((item) => `${item.name}: ${item.percent}%`).join(" | "));
     payload.append("respostas", activeScoredSteps.map((step) => `${step.question}: ${answers[step.id]}`).join(" | "));
 
@@ -307,7 +307,7 @@ export default function Home() {
     window.requestAnimationFrame(() => window.scrollTo({ top: 0, behavior: "auto" }));
   }
 
-  const whatsappText = encodeURIComponent(`Olá! Sou ${lead.name || "um empresário"}, da ${lead.company || "minha empresa"}. Fiz o Diagnóstico E.L.I.T.E., meu score foi ${totalScore}/100 (${band.name}) e meu principal gargalo foi ${priorities[0]?.name}. Faturamento: ${answers.revenue}. Quero agendar meu Mapa de Crescimento.`);
+  const whatsappText = encodeURIComponent(`Olá! Sou ${lead.name || "um empresário"}, da ${lead.company || "minha empresa"}. Fiz o Diagnóstico E.L.I.T.E., meu score foi ${totalScore}/100 (${band.name}) e meu principal gargalo foi ${priorities[0]?.name}. Faturamento: ${answers.revenue}. Quero agendar a reunião para receber meu Mapa de Crescimento, estratégias específicas e o Desafio Perfil que Vende.`);
   const whatsappHref = `https://wa.me/5521999468989?text=${whatsappText}`;
 
   function startDiagnostic() {
@@ -372,7 +372,7 @@ export default function Home() {
         <section className="how-it-works">
           <div className="section-heading">
             <span>Não é mais um quiz genérico</span>
-            <h2>Um raio-x da sua máquina de crescimento.</h2>
+            <h2>Um raio X da sua máquina de crescimento.</h2>
           </div>
           <div className="steps-grid">
             <article><b>01</b><h3>Você responde</h3><p>Perguntas objetivas sobre o que acontece hoje, sem exigir planilhas.</p></article>
@@ -407,7 +407,7 @@ export default function Home() {
         </section>
 
         <section className="results-body">
-          <div className="result-section-title"><span>Visão por pilar</span><h2>Onde sua máquina ganha — e perde — força.</h2></div>
+          <div className="result-section-title"><span>Visão por pilar</span><h2>Onde sua máquina ganha força e onde perde.</h2></div>
           <div className="pillar-results">
             {pillarScores.map((pillar) => (
               <article key={pillar.id} className={pillar.percent < 45 ? "needs-attention" : ""}>
@@ -423,13 +423,17 @@ export default function Home() {
             <div className="cta-copy">
               <span>Reunião + entregável exclusivo</span>
               <h2>O relatório revela o gargalo. A reunião transforma isso em um <em>plano de crescimento executável.</em></h2>
-              <p>Reserve uma Análise Estratégica de 45 minutos com a Elite Mídias. Vamos abrir seu diagnóstico, encontrar as decisões com maior potencial de impacto e desenhar o caminho dos próximos 90 dias para o seu segmento.</p>
+              <p>Reserve uma Análise Estratégica de 45 minutos com a Elite Mídias. Na reunião, vamos abrir seu diagnóstico e construir o seu Mapa de Crescimento com estratégias específicas para o seu negócio e para o seu segmento.</p>
               <div className="meeting-bonus">
-                <b>Bônus liberado para quem participa</b>
-                <strong>Desafio Perfil que Vende</strong>
-                <p>Você recebe acesso a uma jornada prática de 10 dias e 5 missões para transformar o Instagram em uma vitrine comercial: posicionamento, bio, destaques, conteúdo, Stories e Reels.</p>
+                <div className="bonus-gift"><img src="/images/presente-bonus.png" alt="Caixa de presente representando o bônus liberado na reunião" /></div>
+                <div className="bonus-content">
+                  <b>Bônus liberado para quem participa</b>
+                  <strong>Desafio Perfil que Vende</strong>
+                  <p><b>Você recebe</b> acesso a uma jornada prática de 10 dias e 5 missões para transformar o Instagram em uma vitrine comercial com posicionamento, bio, destaques, conteúdo, Stories e Reels.</p>
+                </div>
               </div>
-              <ul><li>Diagnóstico do funil com um especialista</li><li>Prioridades organizadas por impacto e esforço</li><li>Mapa de Crescimento para os próximos 90 dias</li></ul>
+              <ul><li>Mapa de Crescimento para os próximos 90 dias</li><li>Estratégias específicas para o seu negócio</li><li>Acesso completo ao Desafio Perfil que Vende</li></ul>
+              <a className="primary-button green-button cta-copy-button" href={whatsappHref} target="_blank" rel="noreferrer">Agendar minha reunião <span>→</span></a>
             </div>
             <div className="cta-card">
               <div className="ticket-visual"><img src="/images/passe-crescimento.png" alt="Passe estratégico gratuito para uma reunião com a Elite Mídias"/><span>Passe gratuito</span></div>
@@ -456,6 +460,14 @@ export default function Home() {
               ))}
             </div>
           </div>
+
+          <section className="closing-cta">
+            <span>Seu próximo passo</span>
+            <h2>Agende a reunião e receba um plano construído para o seu negócio.</h2>
+            <p>Você sai da reunião com o seu Mapa de Crescimento, estratégias específicas para avançar nos próximos 90 dias e acesso ao Desafio Perfil que Vende.</p>
+            <a className="primary-button green-button" href={whatsappHref} target="_blank" rel="noreferrer">Quero agendar e receber meu mapa <span>→</span></a>
+            <small>Reunião estratégica gratuita de 45 minutos com a Elite Mídias.</small>
+          </section>
 
           <p className="result-disclaimer">O diagnóstico é orientativo e não representa garantia de faturamento ou resultado. Crescimento depende de execução, contexto, investimento e condições de mercado.</p>
         </section>
@@ -510,7 +522,7 @@ export default function Home() {
               <label><span>Seu nome</span><input required autoComplete="name" value={lead.name} onChange={(event) => setLead({ ...lead, name: event.target.value })} placeholder="Como podemos chamar você?" /></label>
               <label><span>Empresa</span><input required autoComplete="organization" value={lead.company} onChange={(event) => setLead({ ...lead, company: event.target.value })} placeholder="Nome do negócio" /></label>
               <label><span>WhatsApp</span><input required autoComplete="tel" inputMode="tel" value={lead.whatsapp} onChange={(event) => setLead({ ...lead, whatsapp: event.target.value })} placeholder="(21) 99999-9999" /></label>
-              <label><span>E-mail profissional</span><input required type="email" autoComplete="email" value={lead.email} onChange={(event) => setLead({ ...lead, email: event.target.value })} placeholder="voce@empresa.com.br" /></label>
+              <label><span>Email profissional</span><input required type="email" autoComplete="email" value={lead.email} onChange={(event) => setLead({ ...lead, email: event.target.value })} placeholder="voce@empresa.com.br" /></label>
               <button className="primary-button green-button" type="submit" disabled={submitting}>{submitting ? "Preparando seu relatório..." : "Ver meu Relatório de Oportunidades"}<span>→</span></button>
               <small>Ao continuar, você concorda em receber o diagnóstico e um contato da Elite Mídias sobre o resultado.</small>
             </form>
