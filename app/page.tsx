@@ -4,6 +4,8 @@ import { FormEvent, useEffect, useMemo, useRef, useState } from "react";
 import { trackMetaEvent } from "@/components/MetaPixel";
 
 type Option = { label: string; value: string | number; detail?: string };
+const CRM_INGEST_URL = "https://elite-midias-crm.vercel.app/api/ingest/8641bbc01861d75ff8475f754a7c5cbc";
+
 type QuizStep = {
   id: string;
   eyebrow: string;
@@ -222,6 +224,7 @@ export default function Home() {
   const [phase, setPhase] = useState<"quiz" | "gate" | "result">("quiz");
   const [lead, setLead] = useState({ name: "", company: "", whatsapp: "", email: "" });
   const [submitting, setSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState("");
   const [soundOn, setSoundOn] = useState(true);
   const audioContextRef = useRef<AudioContext | null>(null);
 
@@ -286,6 +289,25 @@ export default function Home() {
   async function submitLead(event: FormEvent) {
     event.preventDefault();
     setSubmitting(true);
+    setSubmitError("");
+
+    const score = `${totalScore}/100`;
+    const gargalo = priorities[0]?.name ?? band.name;
+    const crmPayload = {
+      nome: lead.name,
+      empresa: lead.company,
+      whatsapp: lead.whatsapp,
+      email: lead.email,
+      score,
+      gargalo,
+      faturamento: String(answers.revenue),
+      segmento: String(answers.segment),
+      objetivo: String(answers.goal),
+      faixa_score: band.name,
+      prioridades: priorities.map((item) => `${item.name}: ${item.percent}%`).join(" | "),
+      respostas: activeScoredSteps.map((step) => `${step.question}: ${answers[step.id]}`).join(" | "),
+    };
+
     const payload = new FormData();
     payload.append("nome", lead.name);
     payload.append("empresa", lead.company);
@@ -298,11 +320,28 @@ export default function Home() {
     payload.append("prioridades", priorities.map((item) => `${item.name}: ${item.percent}%`).join(" | "));
     payload.append("respostas", activeScoredSteps.map((step) => `${step.question}: ${answers[step.id]}`).join(" | "));
 
-    try {
-      const isLocalPreview = ["localhost", "127.0.0.1"].includes(window.location.hostname);
-      if (!isLocalPreview) await fetch("https://formspree.io/f/xgodrpnk", { method: "POST", body: payload, headers: { Accept: "application/json" } });
-    } catch {
-      // O diagnóstico não fica bloqueado se o serviço de captura estiver indisponível.
+    const isLocalPreview = ["localhost", "127.0.0.1"].includes(window.location.hostname);
+
+    if (!isLocalPreview) {
+      try {
+        const crmResponse = await fetch(CRM_INGEST_URL, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(crmPayload),
+        });
+        const crmResult = await crmResponse.json().catch(() => null) as { ok?: boolean } | null;
+        if (!crmResponse.ok || crmResult?.ok !== true) throw new Error("CRM não confirmou o recebimento");
+      } catch {
+        setSubmitting(false);
+        setSubmitError("Não conseguimos liberar seu relatório agora. Verifique sua conexão e tente novamente.");
+        return;
+      }
+
+      try {
+        await fetch("https://formspree.io/f/xgodrpnk", { method: "POST", body: payload, headers: { Accept: "application/json" } });
+      } catch {
+        // O CRM já recebeu o lead. Esta cópia adicional não bloqueia o relatório.
+      }
     }
     setSubmitting(false);
     trackMetaEvent("Lead");
@@ -526,6 +565,7 @@ export default function Home() {
               <label><span>Empresa</span><input required autoComplete="organization" value={lead.company} onChange={(event) => setLead({ ...lead, company: event.target.value })} placeholder="Nome do negócio" /></label>
               <label><span>WhatsApp</span><input required autoComplete="tel" inputMode="tel" value={lead.whatsapp} onChange={(event) => setLead({ ...lead, whatsapp: event.target.value })} placeholder="(21) 99999-9999" /></label>
               <label><span>Email profissional</span><input required type="email" autoComplete="email" value={lead.email} onChange={(event) => setLead({ ...lead, email: event.target.value })} placeholder="voce@empresa.com.br" /></label>
+              {submitError && <p className="form-error" role="alert">{submitError}</p>}
               <button className="primary-button green-button" type="submit" disabled={submitting}>{submitting ? "Preparando seu relatório..." : "Ver meu Relatório de Oportunidades"}<span>→</span></button>
               <small>Ao continuar, você concorda em receber o diagnóstico e um contato da Elite Mídias sobre o resultado.</small>
             </form>
