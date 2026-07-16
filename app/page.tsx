@@ -20,7 +20,8 @@ const contextSteps: QuizStep[] = [
     question: "Qual é o faturamento médio mensal da empresa hoje?",
     support: "A faixa é usada apenas para comparar sua estrutura com o estágio atual do negócio.",
     options: [
-      { label: "Até R$ 30 mil", value: "Até R$ 30 mil", detail: "Validando a máquina comercial" },
+      { label: "Até R$ 20 mil", value: "Até R$ 20 mil", detail: "Validando a máquina comercial" },
+      { label: "R$ 20 mil a R$ 30 mil", value: "R$ 20 mil a R$ 30 mil", detail: "Estruturando a base comercial" },
       { label: "R$ 30 mil a R$ 60 mil", value: "R$ 30 mil a R$ 60 mil", detail: "Buscando previsibilidade" },
       { label: "R$ 60 mil a R$ 100 mil", value: "R$ 60 mil a R$ 100 mil", detail: "Pronto para ganhar escala" },
       { label: "R$ 100 mil a R$ 300 mil", value: "R$ 100 mil a R$ 300 mil", detail: "Estruturando o próximo nível" },
