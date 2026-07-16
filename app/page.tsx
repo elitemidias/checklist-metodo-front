@@ -298,7 +298,24 @@ export default function Home() {
 
     try {
       const isLocalPreview = ["localhost", "127.0.0.1"].includes(window.location.hostname);
-      if (!isLocalPreview) await fetch("https://formspree.io/f/xgodrpnk", { method: "POST", body: payload, headers: { Accept: "application/json" } });
+      if (!isLocalPreview) {
+        await Promise.allSettled([
+          fetch("https://formspree.io/f/xgodrpnk", { method: "POST", body: payload, headers: { Accept: "application/json" } }),
+          fetch("https://elite-midias-crm.vercel.app/api/ingest/8641bbc01861d75ff8475f754a7c5cbc", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              nome: lead.name,
+              whatsapp: lead.whatsapp,
+              email: lead.email,
+              empresa: lead.company,
+              score: `${totalScore}/100`,
+              gargalo: priorities[0]?.name ?? "Não identificado",
+              faturamento: String(answers.revenue),
+            }),
+          }),
+        ]);
+      }
     } catch {
       // O diagnóstico não fica bloqueado se o serviço de captura estiver indisponível.
     }
@@ -308,7 +325,7 @@ export default function Home() {
   }
 
   const whatsappText = encodeURIComponent(`Olá! Sou ${lead.name || "um empresário"}, da ${lead.company || "minha empresa"}. Fiz o Diagnóstico E.L.I.T.E., meu score foi ${totalScore}/100 (${band.name}) e meu principal gargalo foi ${priorities[0]?.name}. Faturamento: ${answers.revenue}. Quero agendar a reunião para receber meu Mapa de Crescimento, estratégias específicas e o Desafio Perfil que Vende.`);
-  const whatsappHref = `https://wa.me/5521999468989?text=${whatsappText}`;
+  const whatsappHref = `https://wa.me/5521966559243?text=${whatsappText}`;
 
   function startDiagnostic() {
     setStarted(true);
