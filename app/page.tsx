@@ -350,7 +350,7 @@ export default function Home() {
   }
 
   const whatsappText = encodeURIComponent(`Olá! Sou ${lead.name || "um empresário"}, da ${lead.company || "minha empresa"}. Fiz o Diagnóstico E.L.I.T.E., meu score foi ${totalScore}/100 (${band.name}) e meu principal gargalo foi ${priorities[0]?.name}. Faturamento: ${answers.revenue}. Quero agendar a reunião para receber meu Mapa de Crescimento, estratégias específicas e o Desafio Perfil que Vende.`);
-  const whatsappHref = `https://wa.me/5521999468989?text=${whatsappText}`;
+  const whatsappHref = `https://wa.me/5521966559243?text=${whatsappText}`;
 
   function startDiagnostic() {
     setStarted(true);
@@ -484,7 +484,7 @@ export default function Home() {
               <p>Uma conversa estratégica aplicada ao seu negócio. Sem apresentação genérica e sem compromisso de contratação.</p>
               <a className="primary-button green-button" href={whatsappHref} target="_blank" rel="noreferrer" onClick={() => trackMetaEvent("Schedule")}>Quero meu plano + bônus <span>→</span></a>
               <button className="pdf-button report-download" onClick={() => window.print()}>Salvar meu relatório em PDF</button>
-              <div className="contact-links"><a href="https://instagram.com/nandoborbaaa" target="_blank" rel="noreferrer">Instagram · @nandoborbaaa</a><a href="https://wa.me/5521999468989" target="_blank" rel="noreferrer">WhatsApp · (21) 99946-8989</a></div>
+              <div className="contact-links"><a href="https://instagram.com/nandoborbaaa" target="_blank" rel="noreferrer">Instagram · @nandoborbaaa</a><a href="https://wa.me/5521966559243" target="_blank" rel="noreferrer">WhatsApp · (21) 96655-9243</a></div>
               <small>Sem custo. As agendas são liberadas conforme disponibilidade e aderência do negócio.</small>
             </div>
           </section>
@@ -513,7 +513,7 @@ export default function Home() {
 
           <p className="result-disclaimer">O diagnóstico é orientativo e não representa garantia de faturamento ou resultado. Crescimento depende de execução, contexto, investimento e condições de mercado.</p>
         </section>
-        <footer className="footer result-footer"><img src="/images/logo-elite.png" alt="" /><p>Elite Mídias · Estratégia, performance e crescimento.</p><a href="https://instagram.com/nandoborbaaa" target="_blank" rel="noreferrer">@nandoborbaaa</a><a href="https://wa.me/5521999468989" target="_blank" rel="noreferrer">(21) 99946-8989</a></footer>
+        <footer className="footer result-footer"><img src="/images/logo-elite.png" alt="" /><p>Elite Mídias · Estratégia, performance e crescimento.</p><a href="https://instagram.com/nandoborbaaa" target="_blank" rel="noreferrer">@nandoborbaaa</a><a href="https://wa.me/5521966559243" target="_blank" rel="noreferrer">(21) 96655-9243</a></footer>
       </main>
     );
   }
