@@ -1,35 +1,101 @@
 import type { Metadata } from "next";
-import { headers } from "next/headers";
 import { MetaPixel } from "@/components/MetaPixel";
+import { OFFICIAL_URL } from "@/lib/funnel";
 import "./globals.css";
 
-export async function generateMetadata(): Promise<Metadata> {
-  const incoming = await headers();
-  const host = incoming.get("x-forwarded-host") ?? incoming.get("host") ?? "localhost";
-  const protocol = incoming.get("x-forwarded-proto") ?? (host.startsWith("localhost") ? "http" : "https");
-  const ogImage = `${protocol}://${host}/og.png`;
-
-  return {
-    title: "Diagnóstico E.L.I.T.E. | Descubra o gargalo do seu crescimento",
-    description: "Em menos de 3 minutos, identifique os gargalos entre marketing, vendas e escala e receba as três prioridades do seu negócio.",
-    applicationName: "Diagnóstico E.L.I.T.E.",
-    icons: { icon: "/images/logo-elite.png", apple: "/images/logo-elite.png" },
-    openGraph: {
-      title: "Diagnóstico E.L.I.T.E. | Elite Mídias",
-      description: "Descubra o que impede sua empresa de crescer com previsibilidade.",
-      type: "website",
-      locale: "pt_BR",
-      images: [{ url: ogImage, width: 1536, height: 1024, alt: "Diagnóstico E.L.I.T.E. da Elite Mídias" }],
+export const metadata: Metadata = {
+  metadataBase: new URL(OFFICIAL_URL),
+  title: "Raio X Elite Mídias | Diagnóstico de marketing e vendas",
+  description:
+    "Descubra seu principal gargalo de marketing e vendas em oito perguntas. Receba três prioridades e prepare seu Mapa de Crescimento com a Elite Mídias.",
+  applicationName: "Raio X Elite Mídias",
+  alternates: { canonical: OFFICIAL_URL + "/" },
+  robots: { index: true, follow: true },
+  icons: { icon: "/images/logo-elite.png", apple: "/images/logo-elite.png" },
+  openGraph: {
+    title: "Raio X Elite Mídias | O que corrigir primeiro para vender melhor",
+    description:
+      "Oito perguntas. Três prioridades. Um próximo passo claro para o seu negócio.",
+    url: OFFICIAL_URL,
+    siteName: "Elite Mídias",
+    type: "website",
+    locale: "pt_BR",
+    images: [
+      {
+        url: "/og.png",
+        width: 1536,
+        height: 1024,
+        alt: "Diagnóstico E.L.I.T.E. da Elite Mídias",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Raio X Elite Mídias",
+    description:
+      "Descubra o gargalo e suas três prioridades de marketing e vendas.",
+    images: ["/og.png"],
+  },
+};
+const schema = {
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "Organization",
+      "@id": OFFICIAL_URL + "/#organization",
+      name: "Elite Mídias",
+      url: OFFICIAL_URL,
+      logo: OFFICIAL_URL + "/images/logo-elite.png",
+      sameAs: [
+        "https://www.instagram.com/elitemidiasmkt",
+        "https://instagram.com/nandoborbaaa",
+      ],
+      contactPoint: {
+        "@type": "ContactPoint",
+        telephone: "+55-21-96655-9243",
+        contactType: "sales",
+        availableLanguage: "Portuguese",
+      },
     },
-    twitter: {
-      card: "summary_large_image",
-      title: "Diagnóstico E.L.I.T.E. | Elite Mídias",
-      description: "Descubra o que impede sua empresa de crescer com previsibilidade.",
-      images: [ogImage],
+    {
+      "@type": "WebSite",
+      "@id": OFFICIAL_URL + "/#website",
+      name: "Raio X Elite Mídias",
+      url: OFFICIAL_URL,
+      inLanguage: "pt-BR",
+      publisher: { "@id": OFFICIAL_URL + "/#organization" },
     },
-  };
-}
-
-export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
-  return <html lang="pt-BR"><body><MetaPixel />{children}</body></html>;
+    {
+      "@type": "Service",
+      name: "Diagnóstico inicial de marketing e vendas",
+      description:
+        "Autoavaliação gratuita por segmento com três prioridades e análise estratégica conforme perfil e disponibilidade.",
+      url: OFFICIAL_URL,
+      provider: { "@id": OFFICIAL_URL + "/#organization" },
+      offers: {
+        "@type": "Offer",
+        price: "0",
+        priceCurrency: "BRL",
+        url: OFFICIAL_URL,
+      },
+    },
+  ],
+};
+export default function RootLayout({
+  children,
+}: Readonly<{ children: React.ReactNode }>) {
+  return (
+    <html lang="pt-BR">
+      <body>
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify(schema).replace(/</g, "\\u003c"),
+          }}
+        />
+        <MetaPixel />
+        {children}
+      </body>
+    </html>
+  );
 }

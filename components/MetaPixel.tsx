@@ -4,7 +4,18 @@ import Script from "next/script";
 
 const pixelId = process.env.NEXT_PUBLIC_META_PIXEL_ID;
 
-type MetaEvent = "Lead" | "Schedule";
+type MetaEvent =
+  | "Lead"
+  | "Schedule"
+  | "Contact"
+  | "DiagnosticStarted"
+  | "QuestionAnswered"
+  | "ReportViewed"
+  | "QualificationStarted"
+  | "QualificationCompleted"
+  | "SchedulingViewed"
+  | "FormError"
+  | "ReportPrintRequested";
 
 declare global {
   interface Window {
@@ -43,8 +54,15 @@ fbq('track', 'PageView');`}
   );
 }
 
-export function trackMetaEvent(event: MetaEvent) {
+export function trackMetaEvent(
+  event: MetaEvent,
+  data?: Record<string, string | number>,
+) {
   if (typeof window !== "undefined" && typeof window.fbq === "function") {
-    window.fbq("track", event);
+    window.fbq(
+      ["Lead", "Schedule", "Contact"].includes(event) ? "track" : "trackCustom",
+      event,
+      data ?? {},
+    );
   }
 }

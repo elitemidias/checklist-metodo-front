@@ -1,215 +1,157 @@
 "use client";
 
-import { FormEvent, useEffect, useMemo, useRef, useState } from "react";
+import {
+  FormEvent,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
+import dynamic from "next/dynamic";
 import { trackMetaEvent } from "@/components/MetaPixel";
+import {
+  Answers,
+  CAL_LINK,
+  FUNNEL_VERSION,
+  WHATSAPP,
+  getDiagnosis,
+  getQualification,
+  getSteps,
+  pillars,
+  qualificationSteps,
+  restoreAnswers,
+} from "@/lib/funnel";
 
-type Option = { label: string; value: string | number; detail?: string };
-const CRM_INGEST_URL = "https://elite-midias-crm.vercel.app/api/ingest/8641bbc01861d75ff8475f754a7c5cbc";
-
-type QuizStep = {
-  id: string;
-  eyebrow: string;
-  question: string;
-  support: string;
-  options: Option[];
-  pillar?: string;
-};
-
-const contextSteps: QuizStep[] = [
-  {
-    id: "revenue",
-    eyebrow: "Para calibrar o diagnóstico",
-    question: "Qual é o faturamento médio mensal da empresa hoje?",
-    support: "A faixa é usada apenas para comparar sua estrutura com o estágio atual do negócio.",
-    options: [
-      { label: "Até R$ 20 mil", value: "Até R$ 20 mil", detail: "Validando a máquina comercial" },
-      { label: "R$ 20 mil a R$ 30 mil", value: "R$ 20 mil a R$ 30 mil", detail: "Estruturando a base comercial" },
-      { label: "R$ 30 mil a R$ 60 mil", value: "R$ 30 mil a R$ 60 mil", detail: "Buscando previsibilidade" },
-      { label: "R$ 60 mil a R$ 100 mil", value: "R$ 60 mil a R$ 100 mil", detail: "Pronto para ganhar escala" },
-      { label: "R$ 100 mil a R$ 300 mil", value: "R$ 100 mil a R$ 300 mil", detail: "Estruturando o próximo nível" },
-      { label: "Acima de R$ 300 mil", value: "Acima de R$ 300 mil", detail: "Otimizando eficiência e expansão" },
-    ],
-  },
-  {
-    id: "segment",
-    eyebrow: "Contexto do negócio",
-    question: "Qual modelo descreve melhor sua empresa?",
-    support: "Isso muda a forma como avaliamos aquisição, conversão e recorrência.",
-    options: [
-      { label: "Serviços profissionais", value: "Serviços profissionais" },
-      { label: "Clínica, saúde ou estética", value: "Clínica, saúde ou estética" },
-      { label: "Comércio ou loja virtual", value: "Comércio ou loja virtual" },
-      { label: "Educação ou infoproduto", value: "Educação ou infoproduto" },
-      { label: "Outro modelo", value: "Outro" },
-    ],
-  },
-  {
-    id: "goal",
-    eyebrow: "Objetivo prioritário",
-    question: "Qual resultado mais faria diferença nos próximos 90 dias?",
-    support: "Escolha o que é prioridade agora. Pense no que mais faria diferença nos próximos 90 dias.",
-    options: [
-      { label: "Gerar mais oportunidades qualificadas", value: "Mais oportunidades qualificadas" },
-      { label: "Vender com mais previsibilidade", value: "Mais previsibilidade" },
-      { label: "Aumentar ticket e margem", value: "Aumentar ticket e margem" },
-      { label: "Escalar sem depender do dono", value: "Escalar sem depender do dono" },
-    ],
-  },
-];
-
-function scored(id: string, pillar: string, eyebrow: string, question: string, support: string, labels: string[]): QuizStep {
-  return { id, pillar, eyebrow, question, support, options: labels.map((label, value) => ({ label, value })) };
-}
-
-const segmentQuestionBanks: Record<string, QuizStep[]> = {
-  "Serviços profissionais": [
-    scored("strategy-goal","strategy","Seu próximo nível","Existe uma meta clara de contratos ou receita para os próximos 90 dias?","Uma meta comercial precisa conectar quantidade de oportunidades, propostas e fechamentos.",["Não existe uma meta definida","Existe uma intenção, mas sem conta reversa","Temos meta e plano, com acompanhamento irregular","A meta orienta pipeline, agenda e decisões semanais"]),
-    scored("image-offer","image","Valor percebido","Antes da reunião, o potencial cliente entende por que deveria contratar você?","Quando o valor só aparece na conversa, a venda depende demais do vendedor.",["Parecemos iguais aos concorrentes","O diferencial exige muita explicação","A proposta é clara na maioria dos canais","O posicionamento gera desejo e sustenta nosso preço"]),
-    scored("leads-channel","leads","Origem das oportunidades","Como novas oportunidades comerciais chegam até você hoje?","Considere oportunidades com perfil e intenção, não apenas seguidores ou contatos.",["Quase exclusivamente por indicação","Por ações isoladas e imprevisíveis","Um canal principal alimenta a agenda","Temos canais previsíveis com custo conhecido"]),
-    scored("leads-demand","leads","Previsibilidade","Se as indicações parassem por 60 dias, sua agenda comercial continuaria cheia?","Essa resposta revela se existe uma máquina de aquisição ou apenas reputação acumulada.",["A agenda praticamente pararia","Teríamos uma queda forte","Manteríamos parte do volume","A demanda continuaria previsível"]),
-    scored("transformation-speed","transformation","Momento da verdade","O que acontece quando alguém pede informações ou solicita uma proposta?","Velocidade e qualificação determinam quanto interesse vira reunião.",["Cada pessoa responde de um jeito","Respondemos, mas sem padrão ou velocidade","Temos roteiro, responsável e algum controle","Resposta, qualificação e agendamento são rápidos e medidos"]),
-    scored("transformation-close","transformation","Da reunião ao contrato","Você conhece a conversão entre reunião, proposta e contrato fechado?","Sem essas taxas, fica difícil saber onde o dinheiro está escapando.",["Não conhecemos as taxas","Temos uma percepção aproximada","Acompanhamos parte do pipeline","Medimos cada etapa e fazemos acompanhamento estruturado"]),
-    scored("image-proof","image","Redução de risco","Sua comunicação mostra casos que provam a transformação entregue?","Casos específicos antecipam confiança e encurtam a decisão.",["Quase não mostramos provas","Temos depoimentos dispersos ou antigos","Usamos bons casos em marketing e vendas","Temos um sistema contínuo de casos, provas e autoridade"]),
-    scored("strategy-economics","strategy","Crescimento rentável","Você sabe quais serviços, perfis de cliente e contratos geram mais margem?","Escalar a oferta errada pode aumentar trabalho sem aumentar lucro.",["Não temos essa visão","Sabemos por sensação","Conhecemos margem e ticket das principais ofertas","Margem, capacidade e LTV orientam o que vendemos"]),
-    scored("evolution-data","evolution","Visão do funil","Marketing e comercial enxergam os mesmos números do primeiro contato ao contrato?","Uma única visão evita que cada área culpe a outra.",["Os dados são fragmentados","Existem relatórios, mas pouca ação","Temos uma visão comum dos principais indicadores","Os dados orientam verba, mensagem e processo comercial"]),
-    scored("evolution-scale","evolution","Capacidade de escala","Se o número de clientes dobrasse, a entrega manteria qualidade e margem?","Crescimento saudável precisa caber na operação.",["A operação entraria em colapso","Cresceríamos com muito improviso","Sustentaríamos com alguns ajustes","Temos processos, time e capacidade planejada"]),
-  ],
-  "Clínica, saúde ou estética": [
-    scored("strategy-goal","strategy","Agenda desejada","Existe uma meta clara de novos pacientes, procedimentos ou ocupação para os próximos 90 dias?","A meta precisa conectar agenda, ticket e capacidade real de atendimento.",["Não existe uma meta definida","Queremos encher a agenda, mas sem números","Temos meta por período, com acompanhamento irregular","Meta de agenda, receita e capacidade orienta a operação"]),
-    scored("image-offer","image","Escolha do paciente","O paciente entende por que deveria escolher sua clínica antes de chamar no WhatsApp?","Especialidade, experiência e segurança precisam ser percebidas rapidamente.",["Parecemos iguais a outras clínicas","O diferencial depende da explicação da recepção","A proposta é clara na maioria dos canais","A marca gera confiança e preferência antes do contato"]),
-    scored("leads-channel","leads","Entrada de pacientes","De onde vêm os novos agendamentos hoje?","Considere pacientes que realmente têm perfil e comparecem.",["Quase só indicação","Ações pontuais e redes sociais sem previsibilidade","Um canal gera agendamentos com frequência","Temos canais previsíveis e custo por agendamento conhecido"]),
-    scored("leads-demand","leads","Ocupação da agenda","Você consegue gerar demanda para horários, profissionais ou procedimentos específicos?","Não basta ter leads; é preciso preencher a capacidade certa.",["Não controlamos a demanda","Fazemos campanhas quando a agenda esvazia","Conseguimos direcionar parte dos agendamentos","Distribuímos demanda por unidade, agenda e procedimento"]),
-    scored("transformation-speed","transformation","Do interesse ao agendamento","Quanto tempo o paciente espera para ser atendido e receber uma opção de horário?","Em saúde e estética, demora e fricção fazem o paciente procurar outra clínica.",["Não existe padrão e muitos contatos se perdem","Respondemos quando a equipe consegue","Temos roteiro e resposta razoavelmente rápida","Atendimento, qualificação e agendamento são rápidos e medidos"]),
-    scored("transformation-show","transformation","Agendamento que vira receita","Você acompanha confirmação, comparecimento e retorno do paciente?","Agenda cheia não significa faturamento se houver faltas e pouco retorno.",["Não acompanhamos essas taxas","Confirmamos manualmente, sem visão do funil","Medimos agendamento e comparecimento","Temos confirmação, recuperação de faltas e reativação estruturadas"]),
-    scored("image-proof","image","Confiança clínica","Sua comunicação usa provas e autoridade de forma ética e convincente?","Depoimentos, bastidores, credenciais e educação reduzem insegurança.",["Quase não mostramos provas","Temos conteúdos e provas dispersos","Usamos provas com consistência e cuidado","Autoridade e confiança são construídas continuamente"]),
-    scored("strategy-economics","strategy","Receita saudável","Você sabe quais procedimentos, agendas e origens de paciente geram mais margem e recorrência?","Crescer ocupando a agenda errada pode reduzir o lucro.",["Não temos essa visão","Sabemos por percepção","Conhecemos ticket e margem dos principais procedimentos","Margem, retorno e recorrência orientam campanhas e agenda"]),
-    scored("evolution-data","evolution","Raio X da jornada","Você conhece as taxas entre contato, agendamento, comparecimento e fechamento?","Esse funil mostra exatamente onde pacientes e receita estão escapando.",["Não conhecemos as taxas","Temos números separados e pouco confiáveis","Acompanhamos as principais etapas","Dados orientam recepção, mídia e oferta semanalmente"]),
-    scored("evolution-scale","evolution","Capacidade de atendimento","Se os agendamentos dobrassem, equipe e agenda sustentariam a experiência?","Escala sem capacidade gera espera, falhas e perda de reputação.",["A operação entraria em colapso","Atenderíamos com muito improviso","Sustentaríamos com alguns ajustes","Temos capacidade, processos e experiência padronizada"]),
-  ],
-  "Comércio ou loja virtual": [
-    scored("strategy-goal","strategy","Meta de crescimento","Existe uma meta clara de faturamento, pedidos e margem para os próximos 90 dias?","Crescer vendas sem proteger margem pode piorar o caixa.",["Não existe uma meta definida","Existe meta de faturamento, sem conta de pedidos e margem","Temos metas, com acompanhamento irregular","Pedidos, ticket, margem e verba orientam a operação"]),
-    scored("image-offer","image","Desejo pelo produto","O cliente entende rapidamente por que comprar de você e não do concorrente?","Produto, oferta, experiência e confiança precisam vencer a comparação.",["Competimos quase só por preço","O diferencial exige muita explicação","A proposta de valor é clara na maioria dos canais","Marca e oferta geram preferência e sustentam margem"]),
-    scored("leads-channel","leads","Tráfego que compra","De onde vêm os clientes que realmente fazem pedidos?","Alcance sem compra não sustenta varejo.",["Dependemos de movimento orgânico ou indicação","Temos ações pontuais sem previsibilidade","Um canal principal gera vendas com frequência","Temos canais previsíveis e custo por compra conhecido"]),
-    scored("leads-demand","leads","Eficiência da mídia","Você sabe quanto pode investir para vender um produto sem destruir a margem?","CAC, ROAS e margem precisam ser lidos juntos.",["Não investimos ou não conhecemos o retorno","Olhamos faturamento ou ROAS isoladamente","Medimos mídia e margem dos principais produtos","Orçamento muda conforme CAC, margem, estoque e recompra"]),
-    scored("transformation-product","transformation","Da visita ao carrinho","A página, vitrine ou atendimento remove as dúvidas que impedem a compra?","Informação, oferta e prova precisam conduzir a decisão.",["Muitos clientes perguntam o básico ou abandonam","A experiência funciona, mas tem atritos claros","Temos boa apresentação e processo de compra","Testamos continuamente página, oferta e conversão"]),
-    scored("transformation-recovery","transformation","Venda recuperada","Existe recuperação de carrinho, orçamento ou cliente que não concluiu?","Parte da receita já demonstrou interesse e só precisa do estímulo certo.",["Não recuperamos oportunidades","Fazemos contatos manuais e esporádicos","Temos automações e algum acompanhamento","Recuperação, remarketing e atendimento são integrados e medidos"]),
-    scored("image-proof","image","Confiança para comprar","Sua comunicação mostra avaliações, demonstrações e provas do produto?","Prova reduz risco, principalmente quando o cliente não pode tocar no produto.",["Quase não mostramos provas","As provas são dispersas ou pouco visíveis","Usamos boas avaliações e demonstrações","Prova, conteúdo e comunidade alimentam vendas continuamente"]),
-    scored("strategy-economics","strategy","Mix lucrativo","Você sabe quais produtos, categorias e clientes geram mais margem e recompra?","Escalar campeões de faturamento que não dão lucro é uma armadilha.",["Não temos essa visão","Sabemos por sensação","Conhecemos margem e giro dos principais produtos","Margem, giro, estoque e LTV orientam campanhas"]),
-    scored("evolution-data","evolution","Jornada completa","Você acompanha visita, carrinho, compra, recompra e receita por canal?","O mapa completo mostra onde otimizar antes de aumentar verba.",["Os dados são fragmentados","Acompanhamos vendas, mas não a jornada","Temos uma visão dos principais indicadores","Dados orientam mídia, oferta, estoque e retenção"]),
-    scored("evolution-scale","evolution","Operação de escala","Se os pedidos dobrassem, estoque, atendimento e entrega sustentariam a promessa?","A experiência após a compra define reputação e recompra.",["A operação entraria em colapso","Cresceríamos com muito improviso","Sustentaríamos com alguns ajustes","Temos estoque, processos e logística preparados"]),
-  ],
-  "Educação ou infoproduto": [
-    scored("strategy-goal","strategy","Meta de matrículas","Existe uma meta clara de matrículas, receita e margem para os próximos 90 dias?","A meta precisa conectar audiência, leads, conversão e capacidade de entrega.",["Não existe uma meta definida","Existe desejo de vender mais, sem conta reversa","Temos meta e calendário, com acompanhamento irregular","Meta, funil e calendário orientam cada campanha"]),
-    scored("image-offer","image","Transformação prometida","O aluno entende claramente a transformação e para quem a oferta é indicada?","Promessas amplas geram curiosidade, mas pouca decisão.",["A oferta parece genérica","A transformação exige muita explicação","A promessa e o público são claros","A oferta gera desejo, identificação e sustenta o preço"]),
-    scored("leads-channel","leads","Audiência que avança","Como novos leads qualificados entram no seu funil?","Seguidores só viram ativo quando avançam para uma próxima etapa.",["Dependemos da audiência atual ou de indicação","Fazemos captações pontuais","Um canal alimenta o funil com frequência","Temos canais previsíveis e custo por lead qualificado"]),
-    scored("leads-demand","leads","Demanda previsível","Você consegue gerar leads fora de lançamentos ou picos de conteúdo?","Uma operação madura não recomeça do zero em cada campanha.",["A demanda desaparece fora dos lançamentos","Dependemos muito do orgânico","Mantemos captação em alguns períodos","Temos aquisição contínua e previsível"]),
-    scored("transformation-funnel","transformation","Do lead à matrícula","Existe uma sequência clara entre captura, conteúdo, oferta e matrícula?","Cada transição precisa elevar consciência e reduzir objeções.",["O lead recebe ações desconectadas","Existe uma sequência informal","Temos funil e automações principais","O funil é medido e otimizado em cada etapa"]),
-    scored("transformation-followup","transformation","Decisão recuperada","O que acontece com quem demonstrou interesse e não comprou?","Acompanhamento e recuperação evitam perder uma audiência já aquecida.",["Nada estruturado acontece","Fazemos contatos pontuais","Temos remarketing e sequências básicas","Recuperação, vendas e nutrição são integradas e medidas"]),
-    scored("image-proof","image","Prova de transformação","Sua comunicação mostra alunos reais, progresso e aplicação prática?","Prova específica torna a promessa concreta.",["Quase não mostramos provas","Temos depoimentos dispersos","Usamos bons casos em campanhas e páginas","Prova e comunidade alimentam autoridade continuamente"]),
-    scored("strategy-economics","strategy","Economia da oferta","Você conhece CAC, conversão, reembolso, ticket e LTV por oferta?","Faturamento de lançamento pode esconder uma operação pouco saudável.",["Não conhecemos esses números","Acompanhamos apenas faturamento e ROAS","Conhecemos os principais indicadores","Economia da oferta orienta verba, preço e calendário"]),
-    scored("evolution-data","evolution","Visão de jornada","Marketing, vendas e entrega enxergam a mesma jornada do lead ao aluno ativo?","A experiência após a venda também influencia prova, retenção e escala.",["Os dados são fragmentados","Existem relatórios separados","Temos uma visão comum dos indicadores principais","Dados orientam aquisição, produto e retenção"]),
-    scored("evolution-scale","evolution","Entrega em escala","Se as matrículas dobrassem, suporte e experiência manteriam a qualidade?","Escalar aquisição sem escalar entrega aumenta cancelamento e destrói prova.",["A entrega entraria em colapso","Cresceríamos com muito improviso","Sustentaríamos com alguns ajustes","Temos produto, suporte e comunidade preparados"]),
-  ],
-  "Outro": [
-    scored("strategy-goal","strategy","Objetivo real","Existe uma meta clara de receita e clientes para os próximos 90 dias?","A meta precisa virar uma conta de oportunidades e vendas.",["Não existe uma meta definida","Existe uma intenção, mas sem plano","Temos meta e plano, com acompanhamento irregular","A meta orienta prioridades e decisões semanais"]),
-    scored("image-offer","image","Valor percebido","O cliente entende rapidamente por que escolher sua empresa?","O diferencial precisa aparecer antes da explicação comercial.",["Parecemos iguais aos concorrentes","O diferencial exige muita explicação","A proposta é clara na maioria dos canais","A marca gera preferência e sustenta nosso preço"]),
-    scored("leads-channel","leads","Entrada de clientes","De onde vêm os clientes com maior chance de comprar?","Considere origem, qualidade e intenção.",["Quase só indicação ou oportunidade espontânea","Ações isoladas e imprevisíveis","Um canal principal gera oportunidades","Temos canais previsíveis e custo conhecido"]),
-    scored("leads-demand","leads","Previsibilidade","Se o melhor canal parasse hoje, existiria outra fonte de demanda?","Dependência de um único canal limita crescimento e aumenta risco.",["A demanda praticamente pararia","Teríamos uma queda forte","Temos uma segunda fonte em desenvolvimento","A aquisição é diversificada e previsível"]),
-    scored("transformation-speed","transformation","Interesse que vira venda","O que acontece depois que alguém demonstra interesse?","Velocidade, clareza e acompanhamento definem conversão.",["Cada pessoa atende de um jeito","Existe um processo informal","Temos etapas e algum acompanhamento","O processo é rápido, padronizado e medido"]),
-    scored("transformation-close","transformation","Conversão real","Você conhece as taxas entre interesse, oportunidade e venda?","Sem essas taxas, o gargalo fica invisível.",["Não conhecemos as taxas","Temos uma percepção aproximada","Acompanhamos parte do funil","Medimos cada etapa e agimos sobre os dados"]),
-    scored("image-proof","image","Confiança","Sua comunicação mostra provas que reduzem o risco da compra?","Casos e demonstrações tornam o valor concreto.",["Quase não mostramos provas","Temos provas dispersas","Usamos boas provas em campanhas e vendas","Temos um sistema contínuo de prova e autoridade"]),
-    scored("strategy-economics","strategy","Crescimento rentável","Você sabe quais produtos, clientes e canais geram mais margem?","Nem todo faturamento merece ser escalado.",["Não temos essa visão","Sabemos por sensação","Conhecemos margem das principais linhas","Margem, CAC e LTV orientam decisões"]),
-    scored("evolution-data","evolution","Visão única","As áreas tomam decisões olhando para os mesmos números?","Uma fonte comum transforma opinião em prioridade.",["Os dados são inexistentes ou fragmentados","Existem relatórios, mas pouca ação","Temos uma visão comum dos indicadores","Dados orientam orçamento, oferta e processo"]),
-    scored("evolution-scale","evolution","Pronto para crescer","Se a demanda dobrasse, sua operação sustentaria a promessa?","Escala saudável precisa manter experiência e margem.",["A operação entraria em colapso","Cresceríamos com muito improviso","Sustentaríamos com alguns ajustes","Temos capacidade, processos e time preparados"]),
-  ],
-};
-
-const pillars = [
-  { id: "strategy", letter: "E", name: "Estratégia", blurb: "Direção comercial, cliente ideal e prioridades.", action: "Definir uma meta de 90 dias e alinhar oferta, público e canal a um único objetivo de receita." },
-  { id: "leads", letter: "L", name: "Leads", blurb: "Aquisição previsível e eficiência de mídia.", action: "Concentrar investimento no canal com melhor sinal de compra e medir custo por oportunidade, não só por lead." },
-  { id: "image", letter: "I", name: "Imagem & Oferta", blurb: "Posicionamento, valor percebido e prova.", action: "Reformular a mensagem central com diferencial claro, prova específica e uma oferta difícil de comparar por preço." },
-  { id: "transformation", letter: "T", name: "Transformação", blurb: "Processo comercial e conversão em receita.", action: "Criar velocidade de resposta, roteiro de qualificação e acompanhamento com taxas visíveis em cada etapa do funil." },
-  { id: "evolution", letter: "E", name: "Evolução & Escala", blurb: "Dados, capacidade e otimização contínua.", action: "Unificar os números de marketing e vendas em um painel simples para decidir onde investir e o que corrigir." },
-];
-
-function getBand(score: number) {
-  if (score < 40) return { name: "Crescimento no esforço", title: "Sua empresa vende, mas o crescimento ainda depende demais de esforço e oportunidade.", copy: "Há vazamentos importantes entre estratégia, aquisição e vendas. Antes de colocar mais verba, o maior ganho tende a vir de organizar a máquina." };
-  if (score < 70) return { name: "Tração sem previsibilidade", title: "Você já construiu tração. O próximo salto está em transformar ações isoladas em sistema.", copy: "A base existe, mas alguns pontos ainda limitam a previsibilidade. Corrigir os gargalos certos pode produzir mais resultado sem simplesmente aumentar o investimento." };
-  return { name: "Pronto para escalar", title: "Sua empresa tem uma boa base. Agora o jogo é escalar com eficiência e controle.", copy: "Oportunidades de crescimento estão menos no básico e mais em otimização: mensagem, conversão, CAC e capacidade de repetir o que já funciona." };
-}
+const BookingCalendar = dynamic(() => import("@/components/BookingCalendar"), {
+  ssr: false,
+  loading: () => (
+    <p className="calendar-loading" role="status">
+      Abrindo os horários disponíveis...
+    </p>
+  ),
+});
+type View =
+  | "landing"
+  | "quiz"
+  | "gate"
+  | "result"
+  | "qualify"
+  | "calendar"
+  | "followup";
+type Lead = { name: string; company: string; whatsapp: string; email: string };
+const DRAFT_KEY = "elite-raiox-respostas-v2";
 
 function OptionIcon({ index }: { index: number }) {
-  const icon = index % 5;
   return (
     <svg className="option-icon" viewBox="0 0 24 24" aria-hidden="true">
-      {icon === 0 && <><circle cx="12" cy="12" r="8"/><path d="M8 12h8"/></>}
-      {icon === 1 && <><path d="M4 17c3-7 6 0 9-7s5-3 7-5"/><circle cx="5" cy="17" r="1.5"/><circle cx="13" cy="10" r="1.5"/></>}
-      {icon === 2 && <><path d="M12 3l7 3v5c0 4.7-2.8 7.8-7 10-4.2-2.2-7-5.3-7-10V6l7-3z"/><path d="M8.5 12l2.2 2.2 4.8-5"/></>}
-      {icon === 3 && <><path d="M4 18V6"/><path d="M4 18h16"/><path d="M7 15l4-4 3 2 5-7"/><path d="M15.5 6H19v3.5"/></>}
-      {icon === 4 && <><path d="M12 3v4M12 17v4M3 12h4M17 12h4"/><path d="M6 6l2.5 2.5M15.5 15.5L18 18M18 6l-2.5 2.5M8.5 15.5L6 18"/><circle cx="12" cy="12" r="2.5"/></>}
+      <circle cx="12" cy="12" r="8" />
+      {index % 2 === 0 ? (
+        <path d="M8 12l3 3 5-6" />
+      ) : (
+        <path d="M7 14l4-4 3 2 4-5" />
+      )}
     </svg>
   );
 }
 
 function AnimatedScore({ score, label }: { score: number; label: string }) {
   const [displayed, setDisplayed] = useState(0);
-
   useEffect(() => {
-    const startedAt = performance.now();
+    const start = performance.now();
     let frame = 0;
     const animate = (now: number) => {
-      const progress = Math.min((now - startedAt) / 1000, 1);
-      const eased = 1 - Math.pow(1 - progress, 3);
-      setDisplayed(Math.round(score * eased));
-      if (progress < 1) frame = requestAnimationFrame(animate);
+      const p = Math.min((now - start) / 900, 1);
+      setDisplayed(Math.round(score * (1 - Math.pow(1 - p, 3))));
+      if (p < 1) frame = requestAnimationFrame(animate);
     };
     frame = requestAnimationFrame(animate);
     return () => cancelAnimationFrame(frame);
   }, [score]);
-
   return (
-    <div className="score-ring score-ring-animated" style={{ "--score": `${displayed * 3.6}deg` } as React.CSSProperties}>
+    <div
+      className="score-ring score-ring-animated"
+      style={{ "--score": `${displayed * 3.6}deg` } as React.CSSProperties}
+    >
       <div>
-        <div className="score-value"><strong>{displayed}</strong><span>/ 100</span></div>
+        <div className="score-value">
+          <strong>{displayed}</strong>
+          <span>/ 100</span>
+        </div>
         <small>{label}</small>
       </div>
     </div>
   );
 }
 
-function RadarChart({ scores }: { scores: Array<(typeof pillars)[number] & { percent: number }> }) {
-  const center = 180;
-  const radius = 112;
-  const point = (index: number, scale: number) => {
-    const angle = (-90 + index * 72) * Math.PI / 180;
-    return `${center + Math.cos(angle) * radius * scale},${center + Math.sin(angle) * radius * scale}`;
+function RadarChart({
+  scores,
+}: {
+  scores: ReturnType<typeof getDiagnosis>["scores"];
+}) {
+  const c = 180,
+    r = 112;
+  const point = (i: number, s: number) => {
+    const a = ((-90 + i * 72) * Math.PI) / 180;
+    return `${c + Math.cos(a) * r * s},${c + Math.sin(a) * r * s}`;
   };
-  const polygon = (scale: number) => scores.map((_, index) => point(index, scale)).join(" ");
-  const labelPoint = (index: number) => {
-    const angle = (-90 + index * 72) * Math.PI / 180;
-    return { x: center + Math.cos(angle) * 148, y: center + Math.sin(angle) * 140 };
-  };
-
   return (
     <section className="radar-section" aria-labelledby="radar-title">
       <div className="radar-copy">
-        <span>Mapa de performance</span>
-        <h2 id="radar-title">Seu perfil de crescimento em uma única visão.</h2>
-        <p>Quanto mais a forma se aproxima das bordas, mais forte está o pilar. As áreas retraídas mostram onde o próximo avanço pode destravar resultado.</p>
-        <div className="radar-legend"><i /> Forças atuais <i /> Oportunidades</div>
+        <span>Seu perfil em uma visão</span>
+        <h2 id="radar-title">Forças atuais e pontos de atenção.</h2>
+        <p>
+          O gráfico resume suas respostas nos cinco pilares. Ele não representa
+          comparação com outras empresas ou previsão de faturamento.
+        </p>
       </div>
       <div className="radar-card">
-        <svg viewBox="0 0 360 360" role="img" aria-label="Gráfico de forças e oportunidades nos cinco pilares E.L.I.T.E.">
-          {[.25, .5, .75, 1].map((scale) => <polygon key={scale} points={polygon(scale)} className="radar-grid" />)}
-          {scores.map((score, index) => <line key={score.id} x1={center} y1={center} x2={point(index, 1).split(",")[0]} y2={point(index, 1).split(",")[1]} className="radar-axis" />)}
-          <polygon points={scores.map((score, index) => point(index, Math.max(score.percent, 8) / 100)).join(" ")} className="radar-shape" />
-          {scores.map((score, index) => {
-            const [cx, cy] = point(index, Math.max(score.percent, 8) / 100).split(",");
-            return <circle key={score.id} cx={cx} cy={cy} r="4" className="radar-dot" />;
-          })}
-          {scores.map((score, index) => {
-            const position = labelPoint(index);
-            return <text key={score.id} x={position.x} y={position.y} textAnchor="middle" className="radar-label"><tspan x={position.x}>{score.name.replace(" & Oferta", "")}</tspan><tspan x={position.x} dy="15">{score.percent}%</tspan></text>;
+        <svg
+          viewBox="0 0 360 360"
+          role="img"
+          aria-label="Autoavaliação nos cinco pilares E.L.I.T.E."
+        >
+          {[0.25, 0.5, 0.75, 1].map((s) => (
+            <polygon
+              key={s}
+              points={scores.map((_, i) => point(i, s)).join(" ")}
+              className="radar-grid"
+            />
+          ))}
+          {scores.map((s, i) => (
+            <line
+              key={s.id}
+              x1={c}
+              y1={c}
+              x2={point(i, 1).split(",")[0]}
+              y2={point(i, 1).split(",")[1]}
+              className="radar-axis"
+            />
+          ))}
+          <polygon
+            points={scores
+              .map((s, i) => point(i, Math.max(s.percent, 6) / 100))
+              .join(" ")}
+            className="radar-shape"
+          />
+          {scores.map((s, i) => {
+            const a = ((-90 + i * 72) * Math.PI) / 180,
+              x = c + Math.cos(a) * 148,
+              y = c + Math.sin(a) * 140;
+            return (
+              <text
+                key={s.id}
+                x={x}
+                y={y}
+                textAnchor="middle"
+                className="radar-label"
+              >
+                <tspan x={x}>{s.name.replace(" & Oferta", "")}</tspan>
+                <tspan x={x} dy="15">
+                  {s.percent}%
+                </tspan>
+              </text>
+            );
           })}
         </svg>
       </div>
@@ -217,303 +159,1013 @@ function RadarChart({ scores }: { scores: Array<(typeof pillars)[number] & { per
   );
 }
 
-export default function Home() {
-  const [started, setStarted] = useState(false);
-  const [stepIndex, setStepIndex] = useState(0);
-  const [answers, setAnswers] = useState<Record<string, string | number>>({});
-  const [phase, setPhase] = useState<"quiz" | "gate" | "result">("quiz");
-  const [lead, setLead] = useState({ name: "", company: "", whatsapp: "", email: "" });
-  const [submitting, setSubmitting] = useState(false);
-  const [submitError, setSubmitError] = useState("");
-  const [soundOn, setSoundOn] = useState(true);
-  const audioContextRef = useRef<AudioContext | null>(null);
-
-  const activeScoredSteps = useMemo(
-    () => segmentQuestionBanks[String(answers.segment)] ?? segmentQuestionBanks.Outro,
-    [answers.segment],
+function Footer() {
+  return (
+    <footer className="footer result-footer">
+      <img src="/images/logo-elite.png" alt="Elite Mídias" />
+      <p>Elite Mídias · Marketing, vendas e crescimento.</p>
+      <a
+        href="https://instagram.com/nandoborbaaa"
+        target="_blank"
+        rel="noreferrer"
+      >
+        @nandoborbaaa
+      </a>
+      <a
+        href={`https://wa.me/${WHATSAPP}`}
+        onClick={() => trackMetaEvent("Contact")}
+        target="_blank"
+        rel="noreferrer"
+      >
+        (21) 96655-9243
+      </a>
+      <a href="/privacidade">Uso dos dados</a>
+    </footer>
   );
-  const allSteps = useMemo(() => [...contextSteps, ...activeScoredSteps], [activeScoredSteps]);
+}
 
-  const pillarScores = useMemo(() => pillars.map((pillar) => {
-    const related = activeScoredSteps.filter((step) => step.pillar === pillar.id);
-    const points = related.reduce((sum, step) => sum + Number(answers[step.id] ?? 0), 0);
-    return { ...pillar, points, percent: Math.round((points / (related.length * 3)) * 100) };
-  }), [activeScoredSteps, answers]);
+export default function Home() {
+  const [view, setView] = useState<View>("landing");
+  const [stepIndex, setStepIndex] = useState(0);
+  const [answers, setAnswers] = useState<Answers>({});
+  const [lead, setLead] = useState<Lead>({
+    name: "",
+    company: "",
+    whatsapp: "",
+    email: "",
+  });
+  const [qualification, setQualification] = useState<Record<string, string>>(
+    {},
+  );
+  const [qualificationIndex, setQualificationIndex] = useState(0);
+  const [submitting, setSubmitting] = useState(false);
+  const [transitioning, setTransitioning] = useState(false);
+  const [error, setError] = useState("");
+  const [soundOn, setSoundOn] = useState(false);
+  const [draftReady, setDraftReady] = useState(false);
+  const [bookingAt, setBookingAt] = useState("");
+  const [bookingSyncError, setBookingSyncError] = useState(false);
+  const sessionRef = useRef("");
+  const attributionRef = useRef<Record<string, string>>({
+    landing_variant: FUNNEL_VERSION,
+  });
+  const transitionRef = useRef(false);
+  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const audioRef = useRef<AudioContext | null>(null);
+  const headingRef = useRef<HTMLHeadingElement>(null);
+  const bookingRef = useRef(false);
+  const segment = String(answers.segment ?? "");
+  const steps = useMemo(() => getSteps(segment), [segment]);
+  const diagnosis = useMemo(
+    () => getDiagnosis(segment, answers),
+    [segment, answers],
+  );
+  const primary = diagnosis.priorities[0];
+  const current = steps[stepIndex];
+  const qStatus = getQualification(qualification);
 
-  const totalScore = useMemo(() => {
-    const points = activeScoredSteps.reduce((sum, step) => sum + Number(answers[step.id] ?? 0), 0);
-    return Math.round((points / (activeScoredSteps.length * 3)) * 100);
-  }, [activeScoredSteps, answers]);
-
-  const priorities = useMemo(() => [...pillarScores].sort((a, b) => a.percent - b.percent).slice(0, 3), [pillarScores]);
-  const band = getBand(totalScore);
-  const current = allSteps[stepIndex];
-  const progress = phase === "quiz" ? Math.round(((stepIndex + 1) / allSteps.length) * 100) : 100;
-
-  function playAnswerTone(index: number) {
-    if (!soundOn || typeof window === "undefined") return;
-    const AudioContextClass = window.AudioContext || (window as typeof window & { webkitAudioContext?: typeof AudioContext }).webkitAudioContext;
-    if (!AudioContextClass) return;
-    const context = audioContextRef.current ?? new AudioContextClass();
-    audioContextRef.current = context;
-    const oscillator = context.createOscillator();
-    const gain = context.createGain();
-    oscillator.type = "sine";
-    oscillator.frequency.setValueAtTime(360 + index * 70, context.currentTime);
-    gain.gain.setValueAtTime(.0001, context.currentTime);
-    gain.gain.exponentialRampToValueAtTime(.07, context.currentTime + .015);
-    gain.gain.exponentialRampToValueAtTime(.0001, context.currentTime + .11);
-    oscillator.connect(gain).connect(context.destination);
-    oscillator.start();
-    oscillator.stop(context.currentTime + .12);
-  }
-
-  function answer(value: string | number, index: number) {
-    playAnswerTone(index);
-    setAnswers((previous) => ({ ...previous, [current.id]: value }));
-    window.setTimeout(() => {
-      if (stepIndex === allSteps.length - 1) setPhase("gate");
-      else setStepIndex((index) => index + 1);
-    }, 180);
-  }
-
-  function goBack() {
-    if (phase === "gate") {
-      setPhase("quiz");
-      setStepIndex(allSteps.length - 1);
-      return;
-    }
-    setStepIndex((index) => Math.max(0, index - 1));
-  }
-
-  async function submitLead(event: FormEvent) {
-    event.preventDefault();
-    setSubmitting(true);
-    setSubmitError("");
-
-    const score = `${totalScore}/100`;
-    const gargalo = priorities[0]?.name ?? band.name;
-    const crmPayload = {
-      nome: lead.name,
-      empresa: lead.company,
-      whatsapp: lead.whatsapp,
-      email: lead.email,
-      score,
-      gargalo,
-      faturamento: String(answers.revenue),
-      segmento: String(answers.segment),
-      objetivo: String(answers.goal),
-      faixa_score: band.name,
-      prioridades: priorities.map((item) => `${item.name}: ${item.percent}%`).join(" | "),
-      respostas: activeScoredSteps.map((step) => `${step.question}: ${answers[step.id]}`).join(" | "),
-    };
-
-    const payload = new FormData();
-    payload.append("nome", lead.name);
-    payload.append("empresa", lead.company);
-    payload.append("whatsapp", lead.whatsapp);
-    payload.append("email", lead.email);
-    payload.append("faturamento", String(answers.revenue));
-    payload.append("segmento", String(answers.segment));
-    payload.append("objetivo", String(answers.goal));
-    payload.append("score_elite", `${totalScore}/100 | ${band.name}`);
-    payload.append("prioridades", priorities.map((item) => `${item.name}: ${item.percent}%`).join(" | "));
-    payload.append("respostas", activeScoredSteps.map((step) => `${step.question}: ${answers[step.id]}`).join(" | "));
-
-    const isLocalPreview = ["localhost", "127.0.0.1"].includes(window.location.hostname);
-
-    if (!isLocalPreview) {
+  useEffect(() => {
+    const hydrationFrame = requestAnimationFrame(() => {
       try {
-        const crmResponse = await fetch(CRM_INGEST_URL, {
+        const draft = JSON.parse(
+          sessionStorage.getItem(DRAFT_KEY) ?? "null",
+        ) as { answers?: unknown; savedAt?: number } | null;
+        if (draft?.savedAt && Date.now() - draft.savedAt < 86400000)
+          setAnswers(restoreAnswers(draft.answers));
+        const params = new URLSearchParams(window.location.search);
+        const saved = JSON.parse(
+          sessionStorage.getItem("elite-raiox-origem-v2") ?? "{}",
+        ) as Record<string, string>;
+        const origin: Record<string, string> = {
+          landing_variant: FUNNEL_VERSION,
+        };
+        for (const key of [
+          "utm_source",
+          "utm_medium",
+          "utm_campaign",
+          "utm_content",
+          "utm_term",
+          "fbclid",
+          "gclid",
+        ]) {
+          const value = params.get(key) ?? saved[key];
+          if (typeof value === "string" && value)
+            origin[key] = value.slice(0, 300);
+        }
+        attributionRef.current = origin;
+        sessionStorage.setItem("elite-raiox-origem-v2", JSON.stringify(origin));
+      } catch {
+        /* A retomada é opcional quando o navegador restringe armazenamento. */
+      }
+      setDraftReady(true);
+    });
+    return () => {
+      cancelAnimationFrame(hydrationFrame);
+      if (timerRef.current) clearTimeout(timerRef.current);
+      void audioRef.current?.close();
+    };
+  }, []);
+  useEffect(() => {
+    if (!draftReady) return;
+    try {
+      sessionStorage.setItem(
+        DRAFT_KEY,
+        JSON.stringify({ answers, savedAt: Date.now() }),
+      );
+    } catch {}
+  }, [answers, draftReady]);
+  useEffect(() => {
+    if (view === "landing") return;
+    const f = requestAnimationFrame(() => {
+      window.scrollTo({ top: 0, behavior: "auto" });
+      headingRef.current?.focus({ preventScroll: true });
+    });
+    return () => cancelAnimationFrame(f);
+  }, [view, stepIndex, qualificationIndex]);
+
+  const sendLead = useCallback(
+    async (
+      phase: "diagnostic" | "qualification" | "booking",
+      extra: Record<string, unknown> = {},
+    ) => {
+      if (!sessionRef.current) sessionRef.current = crypto.randomUUID();
+      const controller = new AbortController(),
+        timer = setTimeout(() => controller.abort(), 16000);
+      try {
+        const response = await fetch("/api/leads", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(crmPayload),
+          body: JSON.stringify({
+            phase,
+            lead,
+            answers,
+            qualification,
+            sessionId: sessionRef.current,
+            attribution: attributionRef.current,
+            ...extra,
+          }),
+          signal: controller.signal,
         });
-        const crmResult = await crmResponse.json().catch(() => null) as { ok?: boolean } | null;
-        if (!crmResponse.ok || crmResult?.ok !== true) throw new Error("CRM não confirmou o recebimento");
-      } catch {
-        setSubmitting(false);
-        setSubmitError("Não conseguimos liberar seu relatório agora. Verifique sua conexão e tente novamente.");
-        return;
+        const result = (await response.json().catch(() => null)) as {
+          ok?: boolean;
+          error?: string;
+        } | null;
+        if (!response.ok || !result?.ok)
+          throw new Error(
+            result?.error ??
+              "Não conseguimos concluir o envio. Tente novamente.",
+          );
+      } finally {
+        clearTimeout(timer);
       }
-
-      try {
-        await fetch("https://formspree.io/f/xgodrpnk", { method: "POST", body: payload, headers: { Accept: "application/json" } });
-      } catch {
-        // O CRM já recebeu o lead. Esta cópia adicional não bloqueia o relatório.
-      }
+    },
+    [lead, answers, qualification],
+  );
+  function start(fresh = false) {
+    setError("");
+    if (fresh) {
+      setAnswers({});
+      setStepIndex(0);
+      setView("quiz");
+    } else {
+      const i = steps.findIndex(
+        (s) => !s.options.some((o) => o.value === answers[s.id]),
+      );
+      setStepIndex(Math.max(i, 0));
+      setView(i === -1 ? "gate" : "quiz");
     }
-    setSubmitting(false);
-    trackMetaEvent("Lead");
-    setPhase("result");
-    window.requestAnimationFrame(() => window.scrollTo({ top: 0, behavior: "auto" }));
+    trackMetaEvent("DiagnosticStarted", { variant: FUNNEL_VERSION });
   }
-
-  const whatsappText = encodeURIComponent(`Olá! Sou ${lead.name || "um empresário"}, da ${lead.company || "minha empresa"}. Fiz o Diagnóstico E.L.I.T.E., meu score foi ${totalScore}/100 (${band.name}) e meu principal gargalo foi ${priorities[0]?.name}. Faturamento: ${answers.revenue}. Quero agendar a reunião para receber meu Mapa de Crescimento, estratégias específicas e o Desafio Perfil que Vende.`);
-  const whatsappHref = `https://wa.me/5521966559243?text=${whatsappText}`;
-
-  function startDiagnostic() {
-    setStarted(true);
-    window.scrollTo({ top: 0, behavior: "auto" });
+  function tone(index: number) {
+    if (!soundOn || typeof window.AudioContext === "undefined") return;
+    try {
+      const c = audioRef.current ?? new AudioContext();
+      audioRef.current = c;
+      const o = c.createOscillator(),
+        g = c.createGain();
+      o.frequency.value = 400 + index * 60;
+      g.gain.setValueAtTime(0.04, c.currentTime);
+      g.gain.exponentialRampToValueAtTime(0.001, c.currentTime + 0.09);
+      o.connect(g);
+      g.connect(c.destination);
+      o.start();
+      o.stop(c.currentTime + 0.1);
+    } catch {}
   }
+  function answer(value: string | number, index: number) {
+    if (transitionRef.current) return;
+    transitionRef.current = true;
+    setTransitioning(true);
+    tone(index);
+    setAnswers((a) => ({ ...a, [current.id]: value }));
+    trackMetaEvent("QuestionAnswered", {
+      question_id: current.id,
+      step: stepIndex + 1,
+    });
+    timerRef.current = setTimeout(() => {
+      if (stepIndex === 7) setView("gate");
+      else setStepIndex((i) => i + 1);
+      transitionRef.current = false;
+      setTransitioning(false);
+    }, 180);
+  }
+  async function submit(event: FormEvent) {
+    event.preventDefault();
+    if (submitting) return;
+    setSubmitting(true);
+    setError("");
+    try {
+      await sendLead("diagnostic");
+      trackMetaEvent("Lead");
+      trackMetaEvent("ReportViewed", { variant: FUNNEL_VERSION });
+      setView("result");
+    } catch (err) {
+      setError(
+        err instanceof Error
+          ? err.message
+          : "Confira sua conexão e tente novamente.",
+      );
+      trackMetaEvent("FormError", { step: "lead" });
+    } finally {
+      setSubmitting(false);
+    }
+  }
+  function beginQualification() {
+    setError("");
+    setQualificationIndex(0);
+    setView("qualify");
+    trackMetaEvent("QualificationStarted");
+  }
+  async function finishQualification() {
+    if (submitting) return;
+    setError("");
+    setSubmitting(true);
+    try {
+      await sendLead("qualification");
+      trackMetaEvent("QualificationCompleted", { status: qStatus });
+      if (qStatus === "ready" || qStatus === "review") {
+        setView("calendar");
+        trackMetaEvent("SchedulingViewed");
+      } else setView("followup");
+    } catch (err) {
+      setError(
+        err instanceof Error
+          ? err.message
+          : "Não conseguimos enviar. Tente novamente.",
+      );
+      trackMetaEvent("FormError", { step: "qualification" });
+    } finally {
+      setSubmitting(false);
+    }
+  }
+  const booked = useCallback(
+    (date: string, uid: string) => {
+      if (bookingRef.current || Number.isNaN(new Date(date).getTime())) return;
+      bookingRef.current = true;
+      setBookingAt(date);
+      trackMetaEvent("Schedule");
+      void sendLead("booking", { bookingAt: date, bookingUid: uid }).catch(() =>
+        setBookingSyncError(true),
+      );
+    },
+    [sendLead],
+  );
+  const whatsappHref = `https://wa.me/${WHATSAPP}?text=${encodeURIComponent(`Olá! Sou ${lead.name || "um empresário"}, da ${lead.company || "minha empresa"}. Fiz o Raio X Elite Mídias. Meu principal ponto de atenção foi ${primary.name} e meu score foi ${diagnosis.score}/100. Quero falar sobre meu diagnóstico e a análise estratégica.`)}`;
+  const savePdf = () => {
+    trackMetaEvent("ReportPrintRequested");
+    window.print();
+  };
 
-  if (!started) {
+  if (view === "landing")
     return (
       <main className="site-shell">
         <header className="topbar">
-          <img src="/images/logo-elite.png" alt="Elite Mídias" className="brand-logo" />
-          <div className="topbar-actions"><span className="topbar-note"><i /> Diagnóstico estratégico gratuito</span><button className="header-cta" onClick={startDiagnostic}>Começar agora</button></div>
+          <img
+            src="/images/logo-elite.png"
+            alt="Elite Mídias"
+            className="brand-logo"
+          />
+          <div className="topbar-actions">
+            <span className="topbar-note">
+              <i /> Diagnóstico de marketing e vendas
+            </span>
+            <button className="header-cta" onClick={() => start()}>
+              Começar meu Raio X
+            </button>
+          </div>
         </header>
-
         <section className="hero">
           <div className="hero-copy">
-            <div className="kicker"><span>Diagnóstico E.L.I.T.E.</span> · Para empresas que já vendem</div>
-            <h1>Descubra o que impede sua empresa de <em>crescer com previsibilidade.</em></h1>
-            <p className="hero-lead">Em menos de 3 minutos, identifique onde sua empresa perde oportunidades entre marketing, vendas e escala. Ao final, receba seu <strong>Relatório de Oportunidades</strong> com as alavancas criadas para ajudar o seu negócio a aumentar o faturamento de forma exponencial.</p>
-            <button className="primary-button green-button" onClick={startDiagnostic}>
-              Fazer meu diagnóstico <span>→</span>
-            </button>
-            <div className="trust-row">
-              <span>✓ Resultado personalizado</span>
-              <span>✓ Sem respostas “certas”</span>
-              <span>✓ Plano de prioridades</span>
+            <div className="kicker">
+              <span>Raio X Elite Mídias</span>
             </div>
+            <p className="audience-label">
+              Para donos de empresas que querem vender melhor
+            </p>
+            <h1>
+              Descubra o que está travando suas vendas e{" "}
+              <em>o que corrigir primeiro.</em>
+            </h1>
+            <p className="hero-lead">
+              Receba três prioridades de marketing e vendas para o seu negócio.
+              Depois, transforme esse diagnóstico em um{" "}
+              <strong>Mapa de Crescimento para os próximos 90 dias</strong>, em
+              uma reunião estratégica com a Elite Mídias.
+            </p>
+            <button
+              className="primary-button green-button"
+              onClick={() => start()}
+            >
+              {Object.keys(answers).length
+                ? "Retomar meu diagnóstico"
+                : "Descobrir meu principal gargalo"}
+              <span>→</span>
+            </button>
+            {Object.keys(answers).length > 0 && (
+              <button className="text-button" onClick={() => start(true)}>
+                Começar do zero
+              </button>
+            )}
+            <div className="trust-row">
+              <span>✓ 8 perguntas</span>
+              <span>✓ Gratuito</span>
+              <span>✓ Adaptado ao seu segmento</span>
+            </div>
+            <p className="entry-note">
+              Ao final, informe seu nome, empresa e WhatsApp para abrir o
+              relatório. O email é opcional.
+            </p>
           </div>
-
-          <div className="hero-visual" aria-label="Visualização dos cinco pilares do crescimento">
+          <div
+            className="hero-visual"
+            aria-label="Os cinco pilares do diagnóstico E.L.I.T.E."
+          >
             <div className="visual-glow" />
             <div className="orbit orbit-one" />
             <div className="orbit orbit-two" />
             <div className="score-preview">
-              <div className="preview-label">Seu sistema de crescimento</div>
+              <div className="preview-label">Clareza para o próximo passo</div>
               <div className="preview-score">E.L.I.T.E.</div>
               <div className="preview-bars">
-                {[82, 61, 74, 48, 67].map((value, index) => <span key={index} style={{ "--bar": `${value}%` } as React.CSSProperties} />)}
+                {[82, 61, 74, 48, 67].map((n, i) => (
+                  <span
+                    key={i}
+                    style={{ "--bar": `${n}%` } as React.CSSProperties}
+                  />
+                ))}
               </div>
-              <div className="preview-caption">5 áreas analisadas · 3 prioridades reveladas</div>
+              <div className="preview-caption">
+                5 áreas avaliadas · 3 prioridades para agir
+              </div>
             </div>
             <span className="floating-tag tag-one">Aquisição</span>
             <span className="floating-tag tag-two">Conversão</span>
-            <span className="floating-tag tag-three">Escala</span>
+            <span className="floating-tag tag-three">Crescimento</span>
           </div>
         </section>
-
-        <section className="method-section" aria-label="Áreas analisadas pelo método E.L.I.T.E.">
-          <div className="section-heading method-heading"><span>O sistema por trás do diagnóstico</span><h2>Cinco áreas conectadas. Um único objetivo: crescimento.</h2></div>
-          <div className="method-system">
-            <div className="method-core"><small>Diagnóstico</small><strong>E.L.I.T.E.</strong><i /></div>
-            {pillars.map((pillar, index) => (
-              <article key={pillar.id} className={`method-node node-${index + 1}`} style={{ "--delay": `${index * .16}s` } as React.CSSProperties}>
-                <b>{pillar.letter}</b><span><strong>{pillar.name}</strong><small>{pillar.blurb}</small></span>
-              </article>
-            ))}
+        <section
+          className="deliverable-preview"
+          aria-labelledby="deliverable-title"
+        >
+          <div>
+            <span className="section-kicker">
+              Um diagnóstico que vira direção
+            </span>
+            <h2 id="deliverable-title">
+              Você entende o gargalo.
+              <br />
+              Na análise, construímos o próximo passo.
+            </h2>
+            <p>
+              Seu relatório inicial mostra o que suas respostas indicam. Na
+              conversa de 30 minutos, validamos esse cenário e organizamos três
+              ações, a ordem de execução e os indicadores para acompanhar.
+            </p>
+            <button
+              className="primary-button green-button"
+              onClick={() => start()}
+            >
+              Quero minhas três prioridades <span>→</span>
+            </button>
           </div>
-          <button className="primary-button green-button method-cta" onClick={startDiagnostic}>Quero descobrir minhas oportunidades <span>→</span></button>
+          <article className="map-preview">
+            <div className="map-top">
+              <span>Mapa de Crescimento</span>
+              <b>90 dias</b>
+            </div>
+            <h3>Um plano que cabe em uma página.</h3>
+            <div>
+              <b>01</b>
+              <p>
+                <strong>Prioridade</strong>O ponto que merece atenção primeiro.
+              </p>
+            </div>
+            <div>
+              <b>02</b>
+              <p>
+                <strong>Próxima ação</strong>O que fazer e em qual sequência.
+              </p>
+            </div>
+            <div>
+              <b>03</b>
+              <p>
+                <strong>Indicador</strong>Como acompanhar o avanço.
+              </p>
+            </div>
+            <small>
+              Exemplo do formato de entrega. O conteúdo será construído para o
+              seu negócio.
+            </small>
+          </article>
         </section>
-
-        <section className="how-it-works">
+        <section className="segment-paths">
           <div className="section-heading">
-            <span>Não é mais um quiz genérico</span>
-            <h2>Um raio X da sua máquina de crescimento.</h2>
+            <span>Seu mercado tem uma jornada própria</span>
+            <h2>
+              Perguntas do seu negócio.
+              <br />
+              Prioridades da sua realidade.
+            </h2>
           </div>
           <div className="steps-grid">
-            <article><b>01</b><h3>Você responde</h3><p>Perguntas objetivas sobre o que acontece hoje, sem exigir planilhas.</p></article>
-            <article><b>02</b><h3>O sistema cruza</h3><p>Seu estágio de receita com cinco áreas que influenciam crescimento.</p></article>
-            <article><b>03</b><h3>Você prioriza</h3><p>Recebe score, gargalos e próximos movimentos em ordem de impacto.</p></article>
+            <article>
+              <b>SAÚDE E ESTÉTICA</b>
+              <h3>Do interesse ao paciente atendido.</h3>
+              <p>
+                Captação, confiança, atendimento e agendamento para clínicas,
+                estética e cirurgia plástica.
+              </p>
+            </article>
+            <article>
+              <b>DISTRIBUIÇÃO, INDÚSTRIA E SERVIÇOS</b>
+              <h3>Da oportunidade ao pedido fechado.</h3>
+              <p>
+                Compradores, cotações, propostas e acompanhamento comercial que
+                gera novos contratos.
+              </p>
+            </article>
+            <article>
+              <b>SUA OPERAÇÃO EM CONTEXTO</b>
+              <h3>O que muda a sua decisão.</h3>
+              <p>
+                O estágio da empresa e seu objetivo dão contexto. Suas respostas
+                definem as prioridades da avaliação inicial.
+              </p>
+            </article>
           </div>
         </section>
-
-        <footer className="footer"><img src="/images/logo-elite.png" alt="" /><p>Elite Mídias · Estratégia, performance e crescimento.</p><a href="https://www.instagram.com/elitemidiasmkt" target="_blank" rel="noreferrer">@elitemidiasmkt</a></footer>
+        <section className="specialist-section">
+          <div className="specialist-mark" aria-hidden="true">
+            NB
+          </div>
+          <div>
+            <span className="section-kicker">
+              A conversa é sobre a sua empresa
+            </span>
+            <h2>Nando Borba e a equipe Elite Mídias.</h2>
+            <p>
+              Vamos olhar para marketing e para o caminho que transforma
+              interesse em venda. Você recebe um mapa inicial de prioridades.
+              Havendo aderência, apresentamos como a assessoria pode ajudar na
+              execução.
+            </p>
+            <a
+              href="https://instagram.com/nandoborbaaa"
+              target="_blank"
+              rel="noreferrer"
+            >
+              Conhecer o trabalho do Nando ↗
+            </a>
+          </div>
+        </section>
+        <details className="method-details">
+          <summary>Conheça os cinco pilares do método E.L.I.T.E.</summary>
+          <section className="method-section" aria-label="Áreas do diagnóstico">
+            <div className="method-system">
+              <div className="method-core">
+                <small>Diagnóstico</small>
+                <strong>E.L.I.T.E.</strong>
+              </div>
+              {pillars.map((p, i) => (
+                <article
+                  key={p.id}
+                  className={`method-node node-${i + 1}`}
+                  style={{ "--delay": `${i * 0.16}s` } as React.CSSProperties}
+                >
+                  <b>{p.letter}</b>
+                  <span>
+                    <strong>{p.name}</strong>
+                    <small>{p.blurb}</small>
+                  </span>
+                </article>
+              ))}
+            </div>
+          </section>
+        </details>
+        <section className="faq-section">
+          <div className="section-heading">
+            <span>Antes de começar</span>
+            <h2>O que esperar do seu Raio X.</h2>
+          </div>
+          <details>
+            <summary>O diagnóstico e a análise são gratuitos?</summary>
+            <p>
+              Sim. O relatório inicial é gratuito. A análise é oferecida
+              conforme o perfil e a disponibilidade de agenda, sem compromisso
+              de contratação.
+            </p>
+          </details>
+          <details>
+            <summary>O que recebo no relatório e na reunião?</summary>
+            <p>
+              No relatório, uma autoavaliação dos cinco pilares, a hipótese de
+              gargalo e três prioridades. Na reunião, validamos o cenário e
+              construímos um mapa inicial com ações, sequência e indicadores
+              para os próximos 90 dias.
+            </p>
+          </details>
+          <details>
+            <summary>Preciso investir para contratar a Elite?</summary>
+            <p>
+              Se houver interesse na assessoria, trabalhamos com uma referência
+              de investimento total a partir de R$ 2.000 por mês, somando
+              assessoria e verba para anúncios. O escopo e a divisão desse valor
+              são apresentados na proposta.
+            </p>
+          </details>
+          <details>
+            <summary>O score é uma auditoria dos meus anúncios?</summary>
+            <p>
+              É uma autoavaliação baseada nas respostas, não uma inspeção das
+              suas contas de anúncio ou uma previsão de faturamento. A análise
+              com a equipe serve para validar as hipóteses e definir o próximo
+              passo.
+            </p>
+          </details>
+          <button
+            className="primary-button green-button"
+            onClick={() => start()}
+          >
+            Fazer meu Raio X gratuito <span>→</span>
+          </button>
+        </section>
+        <Footer />
       </main>
     );
-  }
 
-  if (phase === "result") {
+  if (view === "result")
     return (
       <main className="result-page">
         <header className="quiz-header result-header">
-          <img src="/images/logo-elite.png" alt="Elite Mídias" className="brand-logo" />
-          <div className="result-header-actions"><span>Diagnóstico concluído</span><button className="pdf-button" onClick={() => window.print()}>Salvar relatório em PDF</button></div>
+          <img
+            src="/images/logo-elite.png"
+            alt="Elite Mídias"
+            className="brand-logo"
+          />
+          <div className="result-header-actions">
+            <span>Seu relatório está aberto</span>
+            <button className="pdf-button" onClick={savePdf}>
+              Salvar relatório em PDF
+            </button>
+          </div>
         </header>
-
         <section className="result-hero">
-          <div className="result-kicker">Seu diagnóstico E.L.I.T.E. · {lead.company || "Sua empresa"}</div>
+          <div className="result-kicker">Raio X · {lead.company}</div>
           <div className="result-grid">
             <div>
-              <h1>{band.title}</h1>
-              <p>{band.copy}</p>
-              <div className="result-context"><span>Estágio informado</span><strong>{String(answers.revenue)}</strong><i>·</i><strong>{String(answers.goal)}</strong></div>
+              <h1 ref={headingRef} tabIndex={-1}>
+                Sua primeira prioridade está em <em>{primary.name}.</em>
+              </h1>
+              <p>
+                Você informou: <strong>“{primary.answer}”</strong>. Esse é um
+                ponto para validar antes de definir o próximo investimento.
+              </p>
+              <div className="result-context">
+                <strong>{segment}</strong>
+                <i>·</i>
+                <strong>{String(answers.revenue)}</strong>
+                <i>·</i>
+                <strong>{String(answers.goal)}</strong>
+              </div>
             </div>
-            <AnimatedScore score={totalScore} label={band.name} />
+            <AnimatedScore score={diagnosis.score} label={diagnosis.band} />
+          </div>
+          <p className="score-explanation">
+            Índice de maturidade declarado. Cada pilar representa uma resposta,
+            com o mesmo peso. O faturamento dá contexto e não aumenta ou reduz
+            sua nota.
+          </p>
+          <div className="first-action">
+            <span>Sua primeira ação recomendada</span>
+            <p>{primary.action}</p>
+          </div>
+          <div className="result-next-step">
+            <div>
+              <span>Análise estratégica gratuita</span>
+              <h2>
+                Transforme essas prioridades em um plano para os próximos 90
+                dias.
+              </h2>
+              <p>
+                Em 30 minutos, validamos seu cenário e construímos seu Mapa de
+                Crescimento com três ações, sequência e indicadores.
+              </p>
+            </div>
+            <button
+              className="primary-button green-button"
+              onClick={beginQualification}
+            >
+              Quero agendar minha reunião <span>→</span>
+            </button>
+            <small>
+              Antes da agenda, três perguntas para preparar a conversa.
+            </small>
           </div>
         </section>
-
         <section className="results-body">
-          <div className="result-section-title"><span>Visão por pilar</span><h2>Onde sua máquina ganha força e onde perde.</h2></div>
-          <div className="pillar-results">
-            {pillarScores.map((pillar) => (
-              <article key={pillar.id} className={pillar.percent < 45 ? "needs-attention" : ""}>
-                <div className="pillar-result-top"><b>{pillar.letter}</b><span><strong>{pillar.name}</strong><small>{pillar.blurb}</small></span><em>{pillar.percent}%</em></div>
-                <div className="result-bar"><i style={{ width: `${pillar.percent}%` }} /></div>
-              </article>
-            ))}
-          </div>
-
-          <RadarChart scores={pillarScores} />
-
-          <section className="final-cta">
-            <div className="cta-copy">
-              <span>Reunião + entregável exclusivo</span>
-              <h2>O relatório revela o gargalo. A reunião transforma isso em um <em>plano de crescimento executável.</em></h2>
-              <p>Reserve uma Análise Estratégica de 45 minutos com a Elite Mídias. Na reunião, vamos abrir seu diagnóstico e construir o seu Mapa de Crescimento com estratégias específicas para o seu negócio e para o seu segmento.</p>
-              <div className="meeting-bonus">
-                <div className="bonus-gift"><img src="/images/presente-bonus.png" alt="Caixa de presente representando o bônus liberado na reunião" /></div>
-                <div className="bonus-content">
-                  <b>Bônus liberado para quem participa</b>
-                  <strong>Desafio Perfil que Vende</strong>
-                  <p><b>Você recebe</b> acesso a uma jornada prática de 10 dias e 5 missões para transformar o Instagram em uma vitrine comercial com posicionamento, bio, destaques, conteúdo, Stories e Reels.</p>
-                </div>
-              </div>
-              <ul><li>Mapa de Crescimento para os próximos 90 dias</li><li>Estratégias específicas para o seu negócio</li><li>Acesso completo ao Desafio Perfil que Vende</li></ul>
-              <a className="primary-button green-button cta-copy-button" href={whatsappHref} target="_blank" rel="noreferrer" onClick={() => trackMetaEvent("Schedule")}>Agendar minha reunião <span>→</span></a>
+          <div className="priority-section compact-priorities">
+            <div className="result-section-title">
+              <span>Seu plano inicial</span>
+              <h2>Três prioridades para investigar.</h2>
+              <p>
+                A ordem considera suas respostas e usa seu objetivo para
+                desempatar os pontos de atenção.
+              </p>
             </div>
-            <div className="cta-card">
-              <div className="ticket-visual"><img src="/images/passe-crescimento.png" alt="Passe estratégico gratuito para uma reunião com a Elite Mídias"/><span>Passe gratuito</span></div>
-              <div className="mini-score"><span>Seu ponto de partida</span><strong>{totalScore}/100</strong></div>
-              <h3>Reserve seu Mapa de Crescimento E.L.I.T.E.</h3>
-              <p>Uma conversa estratégica aplicada ao seu negócio. Sem apresentação genérica e sem compromisso de contratação.</p>
-              <a className="primary-button green-button" href={whatsappHref} target="_blank" rel="noreferrer" onClick={() => trackMetaEvent("Schedule")}>Quero meu plano + bônus <span>→</span></a>
-              <button className="pdf-button report-download" onClick={() => window.print()}>Salvar meu relatório em PDF</button>
-              <div className="contact-links"><a href="https://instagram.com/nandoborbaaa" target="_blank" rel="noreferrer">Instagram · @nandoborbaaa</a><a href="https://wa.me/5521966559243" target="_blank" rel="noreferrer">WhatsApp · (21) 96655-9243</a></div>
-              <small>Sem custo. As agendas são liberadas conforme disponibilidade e aderência do negócio.</small>
-            </div>
-          </section>
-
-          <div className="priority-section">
-            <div className="result-section-title"><span>Resumo prioritário</span><h2>As 3 alavancas para atacar primeiro.</h2><p>A ordem considera os pontos de menor maturidade no seu diagnóstico.</p></div>
             <div className="priority-grid">
-              {priorities.map((priority, index) => (
-                <article key={priority.id}>
-                  <div className="priority-number">0{index + 1}</div>
-                  <span>{priority.letter} · {priority.name}</span>
-                  <h3>{index === 0 ? "Gargalo principal" : index === 1 ? "Próxima alavanca" : "Base para sustentar"}</h3>
-                  <p>{priority.action}</p>
+              {diagnosis.priorities.map((p, i) => (
+                <article key={p.id}>
+                  <div className="priority-number">0{i + 1}</div>
+                  <span>{p.name}</span>
+                  <h3>
+                    {i === 0
+                      ? "Primeiro ponto de atenção"
+                      : "Próxima prioridade"}
+                  </h3>
+                  <p>{p.action}</p>
+                  <small>Você respondeu: {p.answer}</small>
                 </article>
               ))}
             </div>
           </div>
-
+          <div className="result-section-title">
+            <span>Visão por pilar</span>
+            <h2>O retrato das suas respostas.</h2>
+          </div>
+          <div className="pillar-results">
+            {diagnosis.scores.map((p) => (
+              <article
+                key={p.id}
+                className={p.percent < 45 ? "needs-attention" : ""}
+              >
+                <div className="pillar-result-top">
+                  <b>{p.letter}</b>
+                  <span>
+                    <strong>{p.name}</strong>
+                    <small>{p.blurb}</small>
+                  </span>
+                  <em>{p.percent}%</em>
+                </div>
+                <div className="result-bar">
+                  <i style={{ width: `${p.percent}%` }} />
+                </div>
+              </article>
+            ))}
+          </div>
+          <RadarChart scores={diagnosis.scores} />
+          <section className="final-cta">
+            <div className="cta-copy">
+              <span>Seu Mapa de Crescimento</span>
+              <h2>
+                Clareza sobre <em>o que fazer primeiro.</em>
+              </h2>
+              <p>
+                Na análise, partimos das suas respostas para validar o gargalo e
+                construir um plano inicial aplicável à sua empresa. Se a
+                assessoria fizer sentido, apresentamos uma proposta de execução.
+              </p>
+              <ul>
+                <li>Três ações prioritárias para o seu cenário</li>
+                <li>Sequência de execução para os próximos 90 dias</li>
+                <li>Indicadores para acompanhar o avanço</li>
+              </ul>
+              <button
+                className="primary-button green-button cta-copy-button"
+                onClick={beginQualification}
+              >
+                Agendar reunião com a Elite <span>→</span>
+              </button>
+              <details className="bonus-secondary">
+                <summary>
+                  Bônus para quem participa: Desafio Perfil que Vende
+                </summary>
+                <div className="meeting-bonus">
+                  <div className="bonus-gift">
+                    <img
+                      src="/images/presente-bonus.png"
+                      alt="Presente do Desafio Perfil que Vende"
+                    />
+                  </div>
+                  <div className="bonus-content">
+                    <strong>Um complemento para sua comunicação.</strong>
+                    <p>
+                      <b>Você recebe</b> acesso ao desafio de 10 dias e 5
+                      missões para organizar posicionamento, bio, destaques e
+                      conteúdo do Instagram.
+                    </p>
+                  </div>
+                </div>
+              </details>
+            </div>
+            <div className="cta-card">
+              <div className="ticket-visual">
+                <img
+                  src="/images/passe-crescimento.png"
+                  alt="Passe gratuito para uma análise com a Elite Mídias"
+                />
+                <span>Análise gratuita</span>
+              </div>
+              <h3>Uma conversa com direção.</h3>
+              <p>
+                O seu relatório é o ponto de partida. A análise ajuda a escolher
+                a prioridade e organizar a execução.
+              </p>
+              <button
+                className="primary-button green-button"
+                onClick={beginQualification}
+              >
+                Agendar e construir meu mapa <span>→</span>
+              </button>
+              <button className="pdf-button report-download" onClick={savePdf}>
+                Salvar meu relatório em PDF
+              </button>
+            </div>
+          </section>
           <section className="closing-cta">
             <span>Seu próximo passo</span>
-            <h2>Agende a reunião e receba um plano construído para o seu negócio.</h2>
-            <p>Você sai da reunião com o seu Mapa de Crescimento, estratégias específicas para avançar nos próximos 90 dias e acesso ao Desafio Perfil que Vende.</p>
-            <a className="primary-button green-button" href={whatsappHref} target="_blank" rel="noreferrer" onClick={() => trackMetaEvent("Schedule")}>Quero agendar e receber meu mapa <span>→</span></a>
-            <small>Reunião estratégica gratuita de 45 minutos com a Elite Mídias.</small>
+            <h2>Leve seu diagnóstico para uma conversa sobre o seu negócio.</h2>
+            <p>
+              Antes da agenda, vamos alinhar decisão, momento e investimento. O
+              relatório continua disponível para você.
+            </p>
+            <button
+              className="primary-button green-button"
+              onClick={beginQualification}
+            >
+              Quero agendar minha reunião <span>→</span>
+            </button>
           </section>
-
-          <p className="result-disclaimer">O diagnóstico é orientativo e não representa garantia de faturamento ou resultado. Crescimento depende de execução, contexto, investimento e condições de mercado.</p>
+          <p className="result-disclaimer">
+            Esta avaliação indica hipóteses a partir das suas respostas.
+            Resultados dependem de contexto, investimento e execução. Não
+            representa garantia de faturamento.
+          </p>
+          <p className="print-contacts">
+            Elite Mídias ·{" "}
+            <a href="https://instagram.com/nandoborbaaa">
+              instagram.com/nandoborbaaa
+            </a>{" "}
+            · <a href={`https://wa.me/${WHATSAPP}`}>WhatsApp (21) 96655-9243</a>
+          </p>
         </section>
-        <footer className="footer result-footer"><img src="/images/logo-elite.png" alt="" /><p>Elite Mídias · Estratégia, performance e crescimento.</p><a href="https://instagram.com/nandoborbaaa" target="_blank" rel="noreferrer">@nandoborbaaa</a><a href="https://wa.me/5521966559243" target="_blank" rel="noreferrer">(21) 96655-9243</a></footer>
+        <Footer />
+      </main>
+    );
+
+  if (view === "calendar")
+    return (
+      <main className="result-page">
+        <header className="quiz-header">
+          <img
+            src="/images/logo-elite.png"
+            alt="Elite Mídias"
+            className="brand-logo"
+          />
+          <button className="pdf-button" onClick={() => setView("result")}>
+            Voltar ao relatório
+          </button>
+        </header>
+        <section className="booking-section">
+          <span className="section-kicker">Seu próximo passo com a Elite</span>
+          <h1 ref={headingRef} tabIndex={-1}>
+            {bookingAt
+              ? "Sua reunião está agendada."
+              : "Escolha o horário da sua reunião."}
+          </h1>
+          {bookingAt ? (
+            <div className="booking-success" role="status">
+              <strong>
+                {new Intl.DateTimeFormat("pt-BR", {
+                  dateStyle: "full",
+                  timeStyle: "short",
+                  timeZone: "America/Sao_Paulo",
+                }).format(new Date(bookingAt))}
+              </strong>
+              <p>
+                Confira a confirmação enviada pela agenda. Separe o site ou
+                Instagram da empresa e, se tiver, os números de captação e
+                vendas. Vamos partir do seu diagnóstico.
+              </p>
+              {bookingSyncError && (
+                <p>
+                  Seu horário foi reservado, mas o resumo não foi sincronizado.
+                  Avise nossa equipe pelo WhatsApp para anexar seu diagnóstico.
+                </p>
+              )}
+              <button
+                className="primary-button green-button"
+                onClick={() => setView("result")}
+              >
+                Rever meu relatório <span>→</span>
+              </button>
+            </div>
+          ) : (
+            <>
+              <p>
+                Conversa de 30 minutos para validar seu diagnóstico e organizar
+                três prioridades. O investimento em uma eventual contratação foi
+                alinhado como referência total a partir de R$ 2.000 por mês,
+                incluindo assessoria e anúncios.
+              </p>
+              <BookingCalendar
+                name={lead.name}
+                email={lead.email}
+                onBooked={booked}
+              />
+              <p className="calendar-fallback">
+                A agenda não abriu?{" "}
+                <a
+                  href={`https://cal.com/${CAL_LINK}`}
+                  target="_blank"
+                  rel="noreferrer"
+                >
+                  Abrir horários em outra aba
+                </a>{" "}
+                ou{" "}
+                <a
+                  href={whatsappHref}
+                  onClick={() => trackMetaEvent("Contact")}
+                  target="_blank"
+                  rel="noreferrer"
+                >
+                  falar com a equipe pelo WhatsApp
+                </a>
+                .
+              </p>
+            </>
+          )}
+        </section>
+        <Footer />
+      </main>
+    );
+
+  if (view === "followup")
+    return (
+      <main className="quiz-page">
+        <header className="quiz-header">
+          <img
+            src="/images/logo-elite.png"
+            alt="Elite Mídias"
+            className="brand-logo"
+          />
+          <button className="pdf-button" onClick={() => setView("result")}>
+            Rever relatório
+          </button>
+        </header>
+        <section className="followup-section">
+          <span className="section-kicker">
+            Seu relatório continua com você
+          </span>
+          <h1 ref={headingRef} tabIndex={-1}>
+            {qStatus === "nurture"
+              ? "Comece pelas prioridades que cabem no seu momento."
+              : "Vamos respeitar o momento da sua empresa."}
+          </h1>
+          <p>
+            {qStatus === "nurture"
+              ? "Você informou que o investimento de referência ainda não cabe no orçamento. Use o diagnóstico para organizar os primeiros ajustes e retome a conversa quando fizer sentido."
+              : "Guarde as três prioridades e envolva quem decide junto com você. Quando houver um momento de execução, podemos retomar a análise."}
+          </p>
+          <div className="first-action">
+            <span>Primeiro movimento sugerido</span>
+            <p>{primary.action}</p>
+          </div>
+          <button
+            className="primary-button green-button"
+            onClick={() => setView("result")}
+          >
+            Voltar ao meu relatório <span>→</span>
+          </button>
+          <button className="text-button" onClick={beginQualification}>
+            Revisar minhas respostas de qualificação
+          </button>
+          <a
+            className="support-link"
+            href={whatsappHref}
+            target="_blank"
+            rel="noreferrer"
+            onClick={() => trackMetaEvent("Contact")}
+          >
+            Quero tirar uma dúvida com a equipe ↗
+          </a>
+        </section>
+        <Footer />
+      </main>
+    );
+
+  if (view === "qualify") {
+    const step = qualificationSteps[qualificationIndex],
+      selected = qualification[step.id];
+    return (
+      <main className="quiz-page">
+        <header className="quiz-header">
+          <img
+            src="/images/logo-elite.png"
+            alt="Elite Mídias"
+            className="brand-logo"
+          />
+          <div className="quiz-progress-meta">
+            <span>Preparação da análise</span>
+            <strong>{qualificationIndex + 1} de 3</strong>
+          </div>
+        </header>
+        <div className="progress-track">
+          <i style={{ width: `${((qualificationIndex + 1) / 3) * 100}%` }} />
+        </div>
+        <section className="question-stage">
+          <div className="question-card">
+            <button
+              className="back-button"
+              onClick={() => {
+                setError("");
+                if (qualificationIndex > 0) setQualificationIndex((i) => i - 1);
+                else setView("result");
+              }}
+              disabled={submitting}
+            >
+              ← Voltar
+            </button>
+            <span className="question-eyebrow">{step.eyebrow}</span>
+            <h1 ref={headingRef} tabIndex={-1}>
+              {step.question}
+            </h1>
+            <p>{step.support}</p>
+            <div
+              className="options-list"
+              role="radiogroup"
+              aria-label={step.question}
+            >
+              {step.options.map((o, i) => (
+                <button
+                  type="button"
+                  role="radio"
+                  aria-checked={selected === o.value}
+                  className={
+                    selected === o.value ? "option selected" : "option"
+                  }
+                  onClick={() =>
+                    setQualification((q) => ({
+                      ...q,
+                      [step.id]: String(o.value),
+                    }))
+                  }
+                  disabled={submitting}
+                  key={o.value}
+                >
+                  <OptionIcon index={i} />
+                  <span>
+                    <strong>{o.label}</strong>
+                  </span>
+                  <i>{selected === o.value ? "✓" : "→"}</i>
+                </button>
+              ))}
+            </div>
+            {error && (
+              <p className="inline-error" role="alert">
+                {error}
+              </p>
+            )}
+            <button
+              className="primary-button green-button qualification-next"
+              disabled={!selected || submitting}
+              onClick={() => {
+                if (qualificationIndex < 2) setQualificationIndex((i) => i + 1);
+                else void finishQualification();
+              }}
+            >
+              {submitting
+                ? "Enviando suas respostas..."
+                : qualificationIndex === 2
+                  ? "Ver meu próximo passo"
+                  : "Continuar"}
+              <span>→</span>
+            </button>
+            <p className="entry-note">
+              Seu relatório permanece disponível, independentemente destas
+              respostas.
+            </p>
+          </div>
+        </section>
       </main>
     );
   }
@@ -521,61 +1173,225 @@ export default function Home() {
   return (
     <main className="quiz-page">
       <header className="quiz-header">
-        <img src="/images/logo-elite.png" alt="Elite Mídias" className="brand-logo" />
-        <div className="quiz-header-tools"><button className="sound-toggle" onClick={() => setSoundOn((value) => !value)} aria-pressed={soundOn} aria-label={soundOn ? "Desativar sons do quiz" : "Ativar sons do quiz"}>{soundOn ? "◉ Som" : "○ Som"}</button><div className="quiz-progress-meta"><span>{phase === "gate" ? "Relatório pronto" : `Pergunta ${stepIndex + 1} de ${allSteps.length}`}</span><strong>{progress}%</strong></div></div>
+        <img
+          src="/images/logo-elite.png"
+          alt="Elite Mídias"
+          className="brand-logo"
+        />
+        <div className="quiz-header-tools">
+          {view === "quiz" && (
+            <button
+              className="sound-toggle"
+              onClick={() => setSoundOn((s) => !s)}
+              aria-pressed={soundOn}
+              aria-label={
+                soundOn ? "Desativar sons do quiz" : "Ativar sons do quiz"
+              }
+            >
+              {soundOn ? "◉ Som" : "○ Som"}
+            </button>
+          )}
+          <div className="quiz-progress-meta">
+            <span>
+              {view === "gate"
+                ? "Seu Raio X está pronto"
+                : `Pergunta ${stepIndex + 1} de 8`}
+            </span>
+            <strong>
+              {view === "gate" ? 100 : Math.round((stepIndex / 8) * 100)}%
+            </strong>
+          </div>
+        </div>
       </header>
-      <div className="progress-track"><i style={{ width: `${progress}%` }} /></div>
-
-      {phase === "quiz" ? (
+      <div className="progress-track">
+        <i
+          style={{ width: `${view === "gate" ? 100 : (stepIndex / 8) * 100}%` }}
+        />
+      </div>
+      {view === "quiz" ? (
         <section className="question-stage" key={current.id}>
           <div className="question-card">
-            <button className="back-button" onClick={goBack} disabled={stepIndex === 0} aria-label="Voltar para a pergunta anterior">← Voltar</button>
+            <button
+              className="back-button"
+              onClick={() => {
+                if (stepIndex > 0) setStepIndex((i) => i - 1);
+                else setView("landing");
+              }}
+              disabled={transitioning}
+            >
+              ← Voltar
+            </button>
             <span className="question-eyebrow">{current.eyebrow}</span>
-            <h1>{current.question}</h1>
+            <h1 ref={headingRef} tabIndex={-1}>
+              {current.question}
+            </h1>
             <p>{current.support}</p>
-            <div className="options-list" role="radiogroup" aria-label={current.question}>
-              {current.options.map((option, index) => {
-                const selected = answers[current.id] === option.value;
-                return (
-                  <button key={`${current.id}-${index}`} className={selected ? "option selected" : "option"} onClick={() => answer(option.value, index)} role="radio" aria-checked={selected}>
-                    <b>{String.fromCharCode(65 + index)}</b>
-                    <OptionIcon index={index} />
-                    <span><strong>{option.label}</strong>{option.detail && <small>{option.detail}</small>}</span>
-                    <i>{selected ? "✓" : "→"}</i>
-                  </button>
-                );
-              })}
+            <div
+              className="options-list"
+              role="radiogroup"
+              aria-label={current.question}
+            >
+              {current.options.map((o, i) => (
+                <button
+                  key={o.value}
+                  type="button"
+                  role="radio"
+                  aria-checked={answers[current.id] === o.value}
+                  className={
+                    answers[current.id] === o.value
+                      ? "option selected"
+                      : "option"
+                  }
+                  disabled={transitioning}
+                  onClick={() => answer(o.value, i)}
+                >
+                  <b>{String.fromCharCode(65 + i)}</b>
+                  <OptionIcon index={i} />
+                  <span>
+                    <strong>{o.label}</strong>
+                  </span>
+                  <i>{answers[current.id] === o.value ? "✓" : "→"}</i>
+                </button>
+              ))}
             </div>
-            <div className="honesty-note"><span>●</span> Responda pelo que acontece hoje. O diagnóstico fica melhor quando a resposta é realista.</div>
+            <div className="honesty-note">
+              <span>●</span> Não precisa consultar planilhas. Responda pelo que
+              acontece hoje.
+            </div>
           </div>
         </section>
       ) : (
         <section className="gate-stage">
           <div className="gate-card">
-            <button className="back-button" onClick={goBack}>← Revisar última resposta</button>
-            <div className="gate-badge">Seu relatório está pronto</div>
-            <div className="locked-preview">
-              <div className="blurred-score" aria-hidden="true">{totalScore}</div>
-              <span>Mapeamos suas forças, seus vazamentos e as 3 oportunidades com maior potencial.</span>
+            <button
+              className="back-button"
+              onClick={() => {
+                setView("quiz");
+                setStepIndex(7);
+                setError("");
+              }}
+              disabled={submitting}
+            >
+              ← Revisar última resposta
+            </button>
+            <div className="gate-badge">Seu Raio X está pronto</div>
+            <div className="report-teaser">
+              <span>Seu primeiro ponto de atenção</span>
+              <strong>{primary.name}</strong>
+              <p>
+                Identificamos três prioridades a partir das suas respostas. Abra
+                o relatório para ver a justificativa e a primeira ação
+                recomendada.
+              </p>
             </div>
-            <h1>Seu diagnóstico foi concluído. Para quem devemos liberar o relatório?</h1>
-            <p>Informe seus dados para abrir sua nota, o mapa dos pilares e as prioridades recomendadas para o seu negócio.</p>
-            <form onSubmit={submitLead} className="lead-form">
-              <label><span>Seu nome</span><input required autoComplete="name" value={lead.name} onChange={(event) => setLead({ ...lead, name: event.target.value })} placeholder="Como podemos chamar você?" /></label>
-              <label><span>Empresa</span><input required autoComplete="organization" value={lead.company} onChange={(event) => setLead({ ...lead, company: event.target.value })} placeholder="Nome do negócio" /></label>
-              <label><span>WhatsApp</span><input required autoComplete="tel" inputMode="tel" value={lead.whatsapp} onChange={(event) => setLead({ ...lead, whatsapp: event.target.value })} placeholder="(21) 99999-9999" /></label>
-              <label><span>Email profissional</span><input required type="email" autoComplete="email" value={lead.email} onChange={(event) => setLead({ ...lead, email: event.target.value })} placeholder="voce@empresa.com.br" /></label>
-              {submitError && <p className="form-error" role="alert">{submitError}</p>}
-              <button className="primary-button green-button" type="submit" disabled={submitting}>{submitting ? "Preparando seu relatório..." : "Ver meu Relatório de Oportunidades"}<span>→</span></button>
-              <small>Ao continuar, você concorda em receber o diagnóstico e um contato da Elite Mídias sobre o resultado.</small>
+            <h1 ref={headingRef} tabIndex={-1}>
+              Para quem devemos abrir o relatório?
+            </h1>
+            <p>
+              Informe seus dados para visualizar o diagnóstico completo. Você
+              poderá salvar em PDF e decidir se quer solicitar uma análise.
+            </p>
+            <form onSubmit={submit} className="lead-form">
+              <label>
+                <span>Seu nome</span>
+                <input
+                  required
+                  minLength={2}
+                  maxLength={120}
+                  autoComplete="name"
+                  value={lead.name}
+                  onChange={(e) => setLead({ ...lead, name: e.target.value })}
+                  placeholder="Como podemos chamar você?"
+                />
+              </label>
+              <label>
+                <span>Empresa</span>
+                <input
+                  required
+                  minLength={2}
+                  maxLength={180}
+                  autoComplete="organization"
+                  value={lead.company}
+                  onChange={(e) =>
+                    setLead({ ...lead, company: e.target.value })
+                  }
+                  placeholder="Nome do negócio"
+                />
+              </label>
+              <label>
+                <span>WhatsApp com DDD</span>
+                <input
+                  required
+                  type="tel"
+                  maxLength={25}
+                  autoComplete="tel"
+                  inputMode="tel"
+                  value={lead.whatsapp}
+                  onChange={(e) =>
+                    setLead({ ...lead, whatsapp: e.target.value })
+                  }
+                  placeholder="(21) 99999-9999"
+                />
+              </label>
+              <label>
+                <span>Email · opcional</span>
+                <input
+                  type="email"
+                  maxLength={180}
+                  autoComplete="email"
+                  value={lead.email}
+                  onChange={(e) => setLead({ ...lead, email: e.target.value })}
+                  placeholder="Se preferir contato por email"
+                />
+              </label>
+              {error && (
+                <p className="form-error" role="alert">
+                  {error}
+                </p>
+              )}
+              <button
+                className="primary-button green-button"
+                type="submit"
+                disabled={submitting}
+              >
+                {submitting
+                  ? "Abrindo seu relatório..."
+                  : "Abrir meu relatório gratuito"}
+                <span>→</span>
+              </button>
+              <small>
+                Ao continuar, você autoriza a Elite Mídias a usar esses dados
+                para o diagnóstico e o contato sobre seu resultado.{" "}
+                <a href="/privacidade" target="_blank">
+                  Veja como usamos os dados.
+                </a>
+              </small>
             </form>
           </div>
           <aside className="gate-summary">
-            <span>Ao abrir seu relatório</span>
-            <h2>Você vai enxergar onde o crescimento está escapando.</h2>
-            <div><b>01</b><p><strong>Sua nota geral</strong>O nível atual da sua máquina de crescimento.</p></div>
-            <div><b>02</b><p><strong>Mapa de forças e vazamentos</strong>O que sustenta e o que limita seu negócio.</p></div>
-            <div><b>03</b><p><strong>3 oportunidades prioritárias</strong>Por onde começar para ganhar tração.</p></div>
+            <span>O que você vai encontrar</span>
+            <h2>Uma direção clara para o próximo passo.</h2>
+            <div>
+              <b>01</b>
+              <p>
+                <strong>O gargalo provável</strong>Com a resposta que levou a
+                essa hipótese.
+              </p>
+            </div>
+            <div>
+              <b>02</b>
+              <p>
+                <strong>Três prioridades</strong>Ações iniciais no contexto do
+                seu segmento.
+              </p>
+            </div>
+            <div>
+              <b>03</b>
+              <p>
+                <strong>Seu mapa dos pilares</strong>O retrato da estrutura que
+                você descreveu.
+              </p>
+            </div>
           </aside>
         </section>
       )}
