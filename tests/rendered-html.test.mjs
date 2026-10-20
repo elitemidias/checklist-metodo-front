@@ -42,6 +42,32 @@ test("privacy page is reachable with privacy specific metadata and contact", asy
   assert.match(html, /Cal\.com/);
 });
 
+test("landing presents the founder and a readable comparison before asking for the diagnosis", async () => {
+  const html = await (await request()).text();
+  assert.match(html, /alt="Nando Borba, fundador da Elite Mídias"/);
+  const comparison =
+    html.match(/<section[^>]*id="diferenca-elite"[\s\S]*?<\/section>/)?.[0] ??
+    "";
+  assert.match(comparison, /<table/);
+  assert.match(comparison, /Agência genérica/);
+  assert.match(comparison, /Com a Elite Mídias/);
+  assert.match(comparison, /<th[^>]*scope="row"/);
+});
+
+test("Leandro testimonial is a real video with user initiated playback and a poster", async () => {
+  const html = await (await request()).text();
+  const video =
+    html.match(
+      /<video[^>]*aria-label="Depoimento de Leandro[^"]*"[^>]*>/,
+    )?.[0] ?? "";
+  assert.match(video, /controls/);
+  assert.match(video, /playsInline|playsinline/);
+  assert.match(video, /preload="none"/);
+  assert.match(video, /poster="\/images\/leandro-depoimento.jpg"/);
+  assert.doesNotMatch(video, /autoplay|autoPlay/);
+  assert.match(html, /src="\/media\/depoimento-leandro.mp4"/);
+});
+
 test("lead endpoint rejects incomplete requests without contacting the CRM", async () => {
   const response = await request("/api/leads", {
     method: "POST",

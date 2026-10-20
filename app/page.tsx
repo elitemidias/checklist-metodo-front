@@ -9,6 +9,14 @@ import {
   useState,
 } from "react";
 import dynamic from "next/dynamic";
+import Image from "next/image";
+import {
+  AgencyComparison,
+  FounderHero,
+  GrowthMapPreview,
+  MarketSegments,
+  LeandroTestimonial,
+} from "@/components/LandingPresentation";
 import { trackMetaEvent } from "@/components/MetaPixel";
 import {
   Answers,
@@ -496,33 +504,10 @@ export default function Home() {
               relatório. O email é opcional.
             </p>
           </div>
-          <div
-            className="hero-visual"
-            aria-label="Os cinco pilares do diagnóstico E.L.I.T.E."
-          >
-            <div className="visual-glow" />
-            <div className="orbit orbit-one" />
-            <div className="orbit orbit-two" />
-            <div className="score-preview">
-              <div className="preview-label">Clareza para o próximo passo</div>
-              <div className="preview-score">E.L.I.T.E.</div>
-              <div className="preview-bars">
-                {[82, 61, 74, 48, 67].map((n, i) => (
-                  <span
-                    key={i}
-                    style={{ "--bar": `${n}%` } as React.CSSProperties}
-                  />
-                ))}
-              </div>
-              <div className="preview-caption">
-                5 áreas avaliadas · 3 prioridades para agir
-              </div>
-            </div>
-            <span className="floating-tag tag-one">Aquisição</span>
-            <span className="floating-tag tag-two">Conversão</span>
-            <span className="floating-tag tag-three">Crescimento</span>
-          </div>
+          <FounderHero />
         </section>
+        <AgencyComparison onStart={() => start()} />
+        <LeandroTestimonial onStart={() => start()} />
         <section
           className="deliverable-preview"
           aria-labelledby="deliverable-title"
@@ -548,76 +533,20 @@ export default function Home() {
               Quero minhas três prioridades <span>→</span>
             </button>
           </div>
-          <article className="map-preview">
-            <div className="map-top">
-              <span>Mapa de Crescimento</span>
-              <b>90 dias</b>
-            </div>
-            <h3>Um plano que cabe em uma página.</h3>
-            <div>
-              <b>01</b>
-              <p>
-                <strong>Prioridade</strong>O ponto que merece atenção primeiro.
-              </p>
-            </div>
-            <div>
-              <b>02</b>
-              <p>
-                <strong>Próxima ação</strong>O que fazer e em qual sequência.
-              </p>
-            </div>
-            <div>
-              <b>03</b>
-              <p>
-                <strong>Indicador</strong>Como acompanhar o avanço.
-              </p>
-            </div>
-            <small>
-              Exemplo do formato de entrega. O conteúdo será construído para o
-              seu negócio.
-            </small>
-          </article>
+          <GrowthMapPreview />
         </section>
-        <section className="segment-paths">
-          <div className="section-heading">
-            <span>Seu mercado tem uma jornada própria</span>
-            <h2>
-              Perguntas do seu negócio.
-              <br />
-              Prioridades da sua realidade.
-            </h2>
-          </div>
-          <div className="steps-grid">
-            <article>
-              <b>SAÚDE E ESTÉTICA</b>
-              <h3>Do interesse ao paciente atendido.</h3>
-              <p>
-                Captação, confiança, atendimento e agendamento para clínicas,
-                estética e cirurgia plástica.
-              </p>
-            </article>
-            <article>
-              <b>DISTRIBUIÇÃO, INDÚSTRIA E SERVIÇOS</b>
-              <h3>Da oportunidade ao pedido fechado.</h3>
-              <p>
-                Compradores, cotações, propostas e acompanhamento comercial que
-                gera novos contratos.
-              </p>
-            </article>
-            <article>
-              <b>SUA OPERAÇÃO EM CONTEXTO</b>
-              <h3>O que muda a sua decisão.</h3>
-              <p>
-                O estágio da empresa e seu objetivo dão contexto. Suas respostas
-                definem as prioridades da avaliação inicial.
-              </p>
-            </article>
-          </div>
-        </section>
+        <MarketSegments />
         <section className="specialist-section">
-          <div className="specialist-mark" aria-hidden="true">
-            NB
-          </div>
+          <figure className="specialist-photo">
+            <Image
+              src="/images/nando-bastidores.jpg"
+              alt="Nando Borba nos bastidores da Elite Mídias"
+              width={1737}
+              height={3088}
+              sizes="(max-width: 600px) 160px, 230px"
+            />
+            <figcaption>Nos bastidores da Elite.</figcaption>
+          </figure>
           <div>
             <span className="section-kicker">
               A conversa é sobre a sua empresa
