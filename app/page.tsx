@@ -9,6 +9,7 @@ import {
   useState,
 } from "react";
 import dynamic from "next/dynamic";
+import { DiagnosisResult } from "@/components/DiagnosisResult";
 import {
   AgencyComparison,
   FounderHero,
@@ -59,110 +60,6 @@ function OptionIcon({ index }: { index: number }) {
         <path d="M7 14l4-4 3 2 4-5" />
       )}
     </svg>
-  );
-}
-
-function AnimatedScore({ score, label }: { score: number; label: string }) {
-  const [displayed, setDisplayed] = useState(0);
-  useEffect(() => {
-    const start = performance.now();
-    let frame = 0;
-    const animate = (now: number) => {
-      const p = Math.min((now - start) / 900, 1);
-      setDisplayed(Math.round(score * (1 - Math.pow(1 - p, 3))));
-      if (p < 1) frame = requestAnimationFrame(animate);
-    };
-    frame = requestAnimationFrame(animate);
-    return () => cancelAnimationFrame(frame);
-  }, [score]);
-  return (
-    <div
-      className="score-ring score-ring-animated"
-      style={{ "--score": `${displayed * 3.6}deg` } as React.CSSProperties}
-    >
-      <div>
-        <div className="score-value">
-          <strong>{displayed}</strong>
-          <span>/ 100</span>
-        </div>
-        <small>{label}</small>
-      </div>
-    </div>
-  );
-}
-
-function RadarChart({
-  scores,
-}: {
-  scores: ReturnType<typeof getDiagnosis>["scores"];
-}) {
-  const c = 180,
-    r = 112;
-  const point = (i: number, s: number) => {
-    const a = ((-90 + i * 72) * Math.PI) / 180;
-    return `${c + Math.cos(a) * r * s},${c + Math.sin(a) * r * s}`;
-  };
-  return (
-    <section className="radar-section" aria-labelledby="radar-title">
-      <div className="radar-copy">
-        <span>Seu perfil em uma visão</span>
-        <h2 id="radar-title">Forças atuais e pontos de atenção.</h2>
-        <p>
-          O gráfico resume suas respostas nos cinco pilares. Ele não representa
-          comparação com outras empresas ou previsão de faturamento.
-        </p>
-      </div>
-      <div className="radar-card">
-        <svg
-          viewBox="0 0 360 360"
-          role="img"
-          aria-label="Autoavaliação nos cinco pilares E.L.I.T.E."
-        >
-          {[0.25, 0.5, 0.75, 1].map((s) => (
-            <polygon
-              key={s}
-              points={scores.map((_, i) => point(i, s)).join(" ")}
-              className="radar-grid"
-            />
-          ))}
-          {scores.map((s, i) => (
-            <line
-              key={s.id}
-              x1={c}
-              y1={c}
-              x2={point(i, 1).split(",")[0]}
-              y2={point(i, 1).split(",")[1]}
-              className="radar-axis"
-            />
-          ))}
-          <polygon
-            points={scores
-              .map((s, i) => point(i, Math.max(s.percent, 6) / 100))
-              .join(" ")}
-            className="radar-shape"
-          />
-          {scores.map((s, i) => {
-            const a = ((-90 + i * 72) * Math.PI) / 180,
-              x = c + Math.cos(a) * 148,
-              y = c + Math.sin(a) * 140;
-            return (
-              <text
-                key={s.id}
-                x={x}
-                y={y}
-                textAnchor="middle"
-                className="radar-label"
-              >
-                <tspan x={x}>{s.name.replace(" & Oferta", "")}</tspan>
-                <tspan x={x} dy="15">
-                  {s.percent}%
-                </tspan>
-              </text>
-            );
-          })}
-        </svg>
-      </div>
-    </section>
   );
 }
 
@@ -612,7 +509,7 @@ export default function Home() {
 
   if (view === "result")
     return (
-      <main className="result-page">
+      <main className="result-page compact-result-page">
         <header className="quiz-header result-header">
           <img
             src="/images/logo-elite.png"
@@ -620,211 +517,19 @@ export default function Home() {
             className="brand-logo"
           />
           <div className="result-header-actions">
-            <span>Seu relatório está aberto</span>
             <button className="pdf-button" onClick={savePdf}>
               Salvar relatório em PDF
             </button>
           </div>
         </header>
-        <section className="result-hero">
-          <div className="result-kicker">Raio X · {lead.company}</div>
-          <div className="result-grid">
-            <div>
-              <h1 ref={headingRef} tabIndex={-1}>
-                Sua primeira prioridade está em <em>{primary.name}.</em>
-              </h1>
-              <p>
-                Você informou: <strong>“{primary.answer}”</strong>. Esse é um
-                ponto para validar antes de definir o próximo investimento.
-              </p>
-              <div className="result-context">
-                <strong>{segment}</strong>
-                <i>·</i>
-                <strong>{String(answers.revenue)}</strong>
-                <i>·</i>
-                <strong>{String(answers.goal)}</strong>
-              </div>
-            </div>
-            <AnimatedScore score={diagnosis.score} label={diagnosis.band} />
-          </div>
-          <p className="score-explanation">
-            Índice de maturidade declarado. Cada pilar representa uma resposta,
-            com o mesmo peso. O faturamento dá contexto e não aumenta ou reduz
-            sua nota.
-          </p>
-          <div className="first-action">
-            <span>Sua primeira ação recomendada</span>
-            <p>{primary.action}</p>
-          </div>
-          <div className="result-next-step">
-            <div>
-              <span>Análise estratégica gratuita</span>
-              <h2>
-                Transforme essas prioridades em um plano para os próximos 90
-                dias.
-              </h2>
-              <p>
-                Em 30 minutos, validamos seu cenário e construímos seu Mapa de
-                Crescimento com três ações, sequência e indicadores.
-              </p>
-            </div>
-            <button
-              className="primary-button green-button"
-              onClick={beginQualification}
-            >
-              Quero agendar minha reunião <span>→</span>
-            </button>
-            <small>
-              Antes da agenda, três perguntas para preparar a conversa.
-            </small>
-          </div>
-        </section>
-        <section className="results-body">
-          <div className="priority-section compact-priorities">
-            <div className="result-section-title">
-              <span>Seu plano inicial</span>
-              <h2>Três prioridades para investigar.</h2>
-              <p>
-                A ordem considera suas respostas e usa seu objetivo para
-                desempatar os pontos de atenção.
-              </p>
-            </div>
-            <div className="priority-grid">
-              {diagnosis.priorities.map((p, i) => (
-                <article key={p.id}>
-                  <div className="priority-number">0{i + 1}</div>
-                  <span>{p.name}</span>
-                  <h3>
-                    {i === 0
-                      ? "Primeiro ponto de atenção"
-                      : "Próxima prioridade"}
-                  </h3>
-                  <p>{p.action}</p>
-                  <small>Você respondeu: {p.answer}</small>
-                </article>
-              ))}
-            </div>
-          </div>
-          <div className="result-section-title">
-            <span>Visão por pilar</span>
-            <h2>O retrato das suas respostas.</h2>
-          </div>
-          <div className="pillar-results">
-            {diagnosis.scores.map((p) => (
-              <article
-                key={p.id}
-                className={p.percent < 45 ? "needs-attention" : ""}
-              >
-                <div className="pillar-result-top">
-                  <b>{p.letter}</b>
-                  <span>
-                    <strong>{p.name}</strong>
-                    <small>{p.blurb}</small>
-                  </span>
-                  <em>{p.percent}%</em>
-                </div>
-                <div className="result-bar">
-                  <i style={{ width: `${p.percent}%` }} />
-                </div>
-              </article>
-            ))}
-          </div>
-          <RadarChart scores={diagnosis.scores} />
-          <section className="final-cta">
-            <div className="cta-copy">
-              <span>Seu Mapa de Crescimento</span>
-              <h2>
-                Clareza sobre <em>o que fazer primeiro.</em>
-              </h2>
-              <p>
-                Na análise, partimos das suas respostas para validar o gargalo e
-                construir um plano inicial aplicável à sua empresa. Se a
-                assessoria fizer sentido, apresentamos uma proposta de execução.
-              </p>
-              <ul>
-                <li>Três ações prioritárias para o seu cenário</li>
-                <li>Sequência de execução para os próximos 90 dias</li>
-                <li>Indicadores para acompanhar o avanço</li>
-              </ul>
-              <button
-                className="primary-button green-button cta-copy-button"
-                onClick={beginQualification}
-              >
-                Agendar reunião com a Elite <span>→</span>
-              </button>
-              <details className="bonus-secondary">
-                <summary>
-                  Bônus para quem participa: Desafio Perfil que Vende
-                </summary>
-                <div className="meeting-bonus">
-                  <div className="bonus-gift">
-                    <img
-                      src="/images/presente-bonus.png"
-                      alt="Presente do Desafio Perfil que Vende"
-                    />
-                  </div>
-                  <div className="bonus-content">
-                    <strong>Um complemento para sua comunicação.</strong>
-                    <p>
-                      <b>Você recebe</b> acesso ao desafio de 10 dias e 5
-                      missões para organizar posicionamento, bio, destaques e
-                      conteúdo do Instagram.
-                    </p>
-                  </div>
-                </div>
-              </details>
-            </div>
-            <div className="cta-card">
-              <div className="ticket-visual">
-                <img
-                  src="/images/passe-crescimento.png"
-                  alt="Passe gratuito para uma análise com a Elite Mídias"
-                />
-                <span>Análise gratuita</span>
-              </div>
-              <h3>Uma conversa com direção.</h3>
-              <p>
-                O seu relatório é o ponto de partida. A análise ajuda a escolher
-                a prioridade e organizar a execução.
-              </p>
-              <button
-                className="primary-button green-button"
-                onClick={beginQualification}
-              >
-                Agendar e construir meu mapa <span>→</span>
-              </button>
-              <button className="pdf-button report-download" onClick={savePdf}>
-                Salvar meu relatório em PDF
-              </button>
-            </div>
-          </section>
-          <section className="closing-cta">
-            <span>Seu próximo passo</span>
-            <h2>Leve seu diagnóstico para uma conversa sobre o seu negócio.</h2>
-            <p>
-              Antes da agenda, vamos alinhar decisão, momento e investimento. O
-              relatório continua disponível para você.
-            </p>
-            <button
-              className="primary-button green-button"
-              onClick={beginQualification}
-            >
-              Quero agendar minha reunião <span>→</span>
-            </button>
-          </section>
-          <p className="result-disclaimer">
-            Esta avaliação indica hipóteses a partir das suas respostas.
-            Resultados dependem de contexto, investimento e execução. Não
-            representa garantia de faturamento.
-          </p>
-          <p className="print-contacts">
-            Elite Mídias ·{" "}
-            <a href="https://instagram.com/nandoborbaaa">
-              instagram.com/nandoborbaaa
-            </a>{" "}
-            · <a href={`https://wa.me/${WHATSAPP}`}>WhatsApp (21) 96655-9243</a>
-          </p>
-        </section>
+        <DiagnosisResult
+          company={lead.company}
+          segment={segment}
+          answers={answers}
+          diagnosis={diagnosis}
+          headingRef={headingRef}
+          onSchedule={beginQualification}
+        />
         <Footer />
       </main>
     );

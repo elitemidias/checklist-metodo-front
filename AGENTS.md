@@ -58,3 +58,16 @@ Após uma publicação, verificar no domínio oficial ao menos a página princip
 - A comparação descreve uma abordagem genérica centrada em tarefas, não uma alegação sobre todas as agências. O mapa é identificado como prévia ilustrativa e não representa projeção de faturamento.
 - Revisão por comentários de 20/10/2026: chamada explícita para comparar agências, apoio para o atendimento fechar mais vendas, promessa simples sobre a clareza obtida na reunião e seis cards de segmentos com ícones próprios e fundos gerados, identificados como ilustrativos. Preservar contraste por camada escura e carregamento tardio das imagens.
 - Antes desta revisão, a fonte publicada e o GitHub estavam no commit `36de4c104ef6b6ed08dfc6cbcfbbbbbc99528e52`, deployment `dpl_HCtmfB1noZ3yFdYxaYJD7bHCVob8`.
+- Prévia de simplificação do resultado aprovada para implementação em 20/10/2026: três faixas (diagnóstico compacto, três ações, convite único), dois botões para a mesma reunião, detalhamento recolhível e relatório completo independente na impressão. Não alterar score, perguntas, qualificação, CRM ou agenda. Validar e apresentar localmente antes de publicar. A rota `/previa/resultado` só existe em desenvolvimento, usa dados ilustrativos e não envia leads; deve retornar 404 em produção.
+- Revisão do plano inicial: cada prioridade deve relacionar a ação aos serviços que a Elite pode executar. O usuário confirmou CRM com etapas e etiquetas, IA de atendimento, tráfego pago, criativos e construção de oferta como exemplos. Selecionar no máximo duas frentes por prioridade, adaptar a jornada ao segmento e diferenciar implantação de otimização conforme a resposta. Não afirmar que IA garante fechamento ou substitui decisão clínica. Manter a proposta como frente a validar na análise estratégica, sem alterar a fórmula do score nem o POST ao CRM.
+- Em 20/10/2026, o usuário aprovou essa revisão para publicação e informou que 96% dos acessos são mobile. Priorizar telas pequenas, testar larguras de 320 a 430 px com alturas a partir de 640 px, conferir rolagem, CTA, formulário, qualificação e agenda. A produção anterior confirmada antes da publicação desta revisão é `dpl_EiGXcbFcaqDPrLg6kvTETcSB29Qy`, commit `4193cbdd0c8ed67afeb670263bc43c51693511d1`.
+
+<!-- BEGIN:nextjs-agent-rules -->
+
+## This is NOT the Next.js you know
+
+This version has breaking changes — APIs, conventions, and file structure may all differ from your training data. Read the relevant guide in `node_modules/next/dist/docs/` (resolved from this file's directory; in monorepos the `next` package may not be visible from the repo root) before writing any code. Heed deprecation notices.
+
+This block is written and re-added by `next dev` — verify at `node_modules/next/dist/server/lib/generate-agent-files.js`. Removing it from a diff only re-creates the uncommitted change; committing it with your work keeps the tree clean.
+
+<!-- END:nextjs-agent-rules -->
