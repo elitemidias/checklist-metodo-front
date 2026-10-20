@@ -9,7 +9,6 @@ import {
   useState,
 } from "react";
 import dynamic from "next/dynamic";
-import Image from "next/image";
 import {
   AgencyComparison,
   FounderHero,
@@ -517,56 +516,25 @@ export default function Home() {
               Um diagnóstico que vira direção
             </span>
             <h2 id="deliverable-title">
-              Você entende o gargalo.
-              <br />
-              Na análise, construímos o próximo passo.
+              Você sairá entendendo o que precisa mudar rapidamente para faturar
+              mais e vencer a concorrência.
             </h2>
             <p>
-              Seu relatório inicial mostra o que suas respostas indicam. Na
-              conversa de 30 minutos, validamos esse cenário e organizamos três
-              ações, a ordem de execução e os indicadores para acompanhar.
+              Em uma reunião de 30 minutos, vamos identificar onde você está
+              perdendo oportunidades de venda. Você recebe seu Mapa de
+              Crescimento com três ações práticas, feitas para o seu negócio,
+              para saber por onde começar e o que fazer depois.
             </p>
             <button
               className="primary-button green-button"
               onClick={() => start()}
             >
-              Quero minhas três prioridades <span>→</span>
+              Quero meu plano para vender mais <span>→</span>
             </button>
           </div>
           <GrowthMapPreview />
         </section>
         <MarketSegments />
-        <section className="specialist-section">
-          <figure className="specialist-photo">
-            <Image
-              src="/images/nando-bastidores.jpg"
-              alt="Nando Borba nos bastidores da Elite Mídias"
-              width={1737}
-              height={3088}
-              sizes="(max-width: 600px) 160px, 230px"
-            />
-            <figcaption>Nos bastidores da Elite.</figcaption>
-          </figure>
-          <div>
-            <span className="section-kicker">
-              A conversa é sobre a sua empresa
-            </span>
-            <h2>Nando Borba e a equipe Elite Mídias.</h2>
-            <p>
-              Vamos olhar para marketing e para o caminho que transforma
-              interesse em venda. Você recebe um mapa inicial de prioridades.
-              Havendo aderência, apresentamos como a assessoria pode ajudar na
-              execução.
-            </p>
-            <a
-              href="https://instagram.com/nandoborbaaa"
-              target="_blank"
-              rel="noreferrer"
-            >
-              Conhecer o trabalho do Nando ↗
-            </a>
-          </div>
-        </section>
         <details className="method-details">
           <summary>Conheça os cinco pilares do método E.L.I.T.E.</summary>
           <section className="method-section" aria-label="Áreas do diagnóstico">

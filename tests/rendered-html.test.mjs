@@ -77,3 +77,27 @@ test("lead endpoint rejects incomplete requests without contacting the CRM", asy
   assert.equal(response.status, 400);
   assert.equal((await response.json()).ok, false);
 });
+
+test("each market card renders its own lazy background and decorative sector icon", async () => {
+  const html = await (await request()).text();
+  const section =
+    html.match(
+      /<section[^>]*aria-labelledby="market-title"[\s\S]*?<\/section>/,
+    )?.[0] ?? "";
+  const cards = [...section.matchAll(/<li[\s\S]*?<\/li>/g)].map(
+    ([card]) => card,
+  );
+  assert.equal(cards.length, 6);
+  const sources = new Set();
+  for (const card of cards) {
+    const image = card.match(/<img[^>]*>/)?.[0] ?? "";
+    assert.match(image, /loading="lazy"/);
+    assert.match(image, /alt=""/);
+    const source = image.match(/src="([^"]+)"/)?.[1];
+    assert.ok(source, "Every sector needs an image");
+    sources.add(source);
+    assert.match(card, /<svg[^>]*aria-hidden="true"/);
+    assert.match(card, /<h3>/);
+  }
+  assert.equal(sources.size, 6, "Every sector needs its own background");
+});

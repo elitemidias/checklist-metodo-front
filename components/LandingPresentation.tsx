@@ -161,7 +161,7 @@ const comparisons = [
     title: "Depois que o contato chega",
     generic: "O anúncio termina o trabalho. O restante fica desconectado.",
     elite:
-      "Apoio para organizar contatos e acompanhamento. Sua equipe mantém o atendimento e o fechamento.",
+      "Ajustamos com você o que falta no seu atendimento para fechar mais vendas.",
   },
   {
     title: "Antes de aumentar a verba",
@@ -201,6 +201,9 @@ export function AgencyComparison({ onStart }: StartProps) {
         </div>
       </div>
       <div className="comparison-table-wrap">
+        <div className="comparison-intro">
+          Compare outras agências com a Elite Mídias aqui
+        </div>
         <table className="comparison-table">
           <caption>
             Comparação de abordagens: uma operação genérica focada em tarefas e
@@ -370,6 +373,72 @@ export function LeandroTestimonial({ onStart }: StartProps) {
   );
 }
 
+const marketSegments = [
+  {
+    id: "estetica",
+    name: "Estética e clínicas",
+    description: "Mais contatos que viram agendamentos.",
+    icon: (
+      <>
+        <path d="M12 3v18M3 12h18M7 7l10 10M7 17 17 7" />
+        <circle cx="12" cy="12" r="5" />
+      </>
+    ),
+  },
+  {
+    id: "cirurgia-plastica",
+    name: "Cirurgia plástica",
+    description: "Confiança do primeiro contato à avaliação.",
+    icon: (
+      <>
+        <path d="M8 3v5a4 4 0 0 0 8 0V3M6 3h4m4 0h4M12 12v3a5 5 0 0 0 10 0v-2" />
+        <circle cx="21" cy="10" r="2" />
+      </>
+    ),
+  },
+  {
+    id: "distribuidora",
+    name: "Distribuidoras",
+    description: "Mais compradores, pedidos e recompra.",
+    icon: (
+      <>
+        <path d="m3 7 9-4 9 4-9 4-9-4Zm0 0v10l9 4 9-4V7M12 11v10M7.5 5 17 9" />
+      </>
+    ),
+  },
+  {
+    id: "industria",
+    name: "Indústria e fábrica",
+    description: "Da cotação ao pedido fechado.",
+    icon: (
+      <>
+        <path d="M3 21V10l6 3V8l6 4V3h4l2 18H3ZM7 17h1m4 0h1m4 0h1" />
+      </>
+    ),
+  },
+  {
+    id: "servicos",
+    name: "Serviços",
+    description: "Do orçamento à venda, sem perder o contato.",
+    icon: (
+      <>
+        <rect x="3" y="7" width="18" height="14" rx="2" />
+        <path d="M8 7V3h8v4M3 12a25 25 0 0 0 18 0M10 13h4v3h-4z" />
+      </>
+    ),
+  },
+  {
+    id: "comercio",
+    name: "Comércio",
+    description: "Do interesse à compra e à próxima visita.",
+    icon: (
+      <>
+        <path d="M4 10v11h16V10M3 3h18l1 7a3 3 0 0 1-5 2 3 3 0 0 1-5 0 3 3 0 0 1-5 0 3 3 0 0 1-5-2l1-7ZM9 21v-6h6v6M7 3l-1 7m6-7v7m5-7 1 7" />
+      </>
+    ),
+  },
+];
+
 export function MarketSegments() {
   return (
     <section className="market-strip" aria-labelledby="market-title">
@@ -388,20 +457,38 @@ export function MarketSegments() {
         </p>
       </div>
       <ul>
-        {[
-          "Estética e clínicas",
-          "Cirurgia plástica",
-          "Distribuidoras",
-          "Indústria e fábrica",
-          "Serviços",
-          "Comércio",
-        ].map((name, index) => (
-          <li key={name}>
-            <SparkIcon kind={index % 2 === 0 ? "target" : "route"} />
-            {name}
+        {marketSegments.map((segment) => (
+          <li key={segment.id} className="sector-card">
+            <Image
+              src={`/images/segmentos/${segment.id}-v1.png`}
+              alt=""
+              fill
+              sizes="(max-width: 760px) 50vw, (max-width: 1240px) 33vw, 390px"
+              className="sector-card-image"
+            />
+            <div className="sector-card-content">
+              <span className="sector-icon">
+                <svg
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="1.5"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  aria-hidden="true"
+                >
+                  {segment.icon}
+                </svg>
+              </span>
+              <h3>{segment.name}</h3>
+              <p>{segment.description}</p>
+            </div>
           </li>
         ))}
       </ul>
+      <small className="market-image-note">
+        Imagens ilustrativas dos segmentos.
+      </small>
     </section>
   );
 }
